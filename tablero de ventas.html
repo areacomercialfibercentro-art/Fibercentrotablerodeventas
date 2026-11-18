@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fiber Centro Ventas BI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style data-app="">
+/* Layout: banda de marca, columna lateral (carga, historial, segmentadores) y área principal con KPIs, tendencia, comparativo, gráficos y detalle */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --surface-2:#eaf0ec; --line:#d5e0d9;
+  --fg:#14211a; --muted:#5b6e63;
+  --green:#0b7a45; --green-2:#13a35e; --green-soft:#dff2e7;
+  --amber:#e9a317; --orange:#e2671b; --c4:#2f6f9f; --c5:#8a5cb8; --c6:#8a9a90;
+  --p1:#2563eb; --p2:#ea580c; --p3:#16a34a; --p4:#9333ea; --p5:#dc2626; --p6:#0891b2; --p7:#ca8a04; --p8:#db2777; --p9:#4f46e5; --p10:#65a30d; --gray:#94a3b8;
+  --danger:#c23a2b; --danger-soft:#fbe7e4; --warn-soft:#fdf0d5;
+  --band:#0b3d26; --band-fg:#e8f5ee;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1511; --surface:#14201a; --surface-2:#1a2a22; --line:#27392f;
+  --fg:#e6efe9; --muted:#93a89c;
+  --green:#2fbf78; --green-2:#45d68c; --green-soft:#173a28;
+  --amber:#f0b43a; --orange:#f07f35; --c4:#5ea4d6; --c5:#b28ae0; --c6:#7d8f84;
+  --p1:#60a5fa; --p2:#fb923c; --p3:#4ade80; --p4:#c084fc; --p5:#f87171; --p6:#22d3ee; --p7:#facc15; --p8:#f472b6; --p9:#818cf8; --p10:#a3e635; --gray:#64748b;
+  --danger:#f07a6b; --danger-soft:#3a1d19; --warn-soft:#3a2e14;
+  --band:#08251a; --band-fg:#dff2e7; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1511; --surface:#14201a; --surface-2:#1a2a22; --line:#27392f;
+  --fg:#e6efe9; --muted:#93a89c;
+  --green:#2fbf78; --green-2:#45d68c; --green-soft:#173a28;
+  --amber:#f0b43a; --orange:#f07f35; --c4:#5ea4d6; --c5:#b28ae0; --c6:#7d8f84;
+  --p1:#60a5fa; --p2:#fb923c; --p3:#4ade80; --p4:#c084fc; --p5:#f87171; --p6:#22d3ee; --p7:#facc15; --p8:#f472b6; --p9:#818cf8; --p10:#a3e635; --gray:#64748b;
+  --danger:#f07a6b; --danger-soft:#3a1d19; --warn-soft:#3a2e14;
+  --band:#08251a; --band-fg:#dff2e7; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px}
+.footer{border-top:1px solid var(--line)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{background:var(--band);color:var(--band-fg)}
+.display{font-family:var(--f-display);text-wrap:balance}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.muted{color:var(--muted)}
+.ta,.inp,.sel{background:var(--surface-2);border:1px solid var(--line);color:var(--fg);border-radius:8px}
+.ta{font-family:var(--f-mono);font-size:12px;line-height:1.5;resize:vertical}
+.ta:focus,.sel:focus,.inp:focus{outline:2px solid var(--green);outline-offset:1px}
+.btn-primary{background:var(--green);color:#fff;font-weight:600;border-radius:8px;transition:filter .15s}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{border:1px solid var(--line);color:var(--fg);border-radius:8px;background:transparent}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-link{color:var(--green);font-weight:600;font-size:12px}
+.btn-danger{color:var(--danger);font-weight:600;font-size:12px}
+button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 10px;font-size:12px;line-height:1.2;cursor:pointer;transition:background .12s,border-color .12s;max-width:100%}
+.chip:hover{border-color:var(--green)}
+.chip .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.chip[aria-pressed="true"] .n{color:#e3f6eb}
+.chip .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-all{font-weight:600}
+.chiplist{display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow-y:auto;padding-right:2px}
+.kpi-val{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,2.6vw,30px);line-height:1.05;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;font-family:var(--f-mono);white-space:nowrap}
+.pill-up{background:var(--green-soft);color:var(--green)}
+.pill-down{background:var(--danger-soft);color:var(--danger)}
+.pill-flat{background:var(--surface-2);color:var(--muted)}
+.pill-warn{background:var(--warn-soft);color:var(--fg)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:200px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:8px;padding:16px;background:repeating-linear-gradient(135deg,transparent 0 10px,var(--surface-2) 10px 11px)}
+.empty .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.empty .dot{animation:none}}
+.heat-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:baseline}
+.heat-track{grid-column:1 / -1;height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.heat-fill{height:100%;border-radius:999px;transition:width .35s ease}
+.legend-bar{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--p5),var(--amber),var(--green))}
+.msg{border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.45}
+.msg-ok{background:var(--green-soft);color:var(--fg)}
+.msg-err{background:var(--danger-soft);color:var(--fg)}
+.msg-warn{background:var(--warn-soft);color:var(--fg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{padding:5px 10px;font-size:12px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);font-weight:600}
+.minw0{min-width:0}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{position:sticky;top:0;background:var(--surface-2);text-align:left;font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 10px;white-space:nowrap}
+.tbl td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap;vertical-align:top}
+.tbl td.wrap-cell{white-space:normal;min-width:180px;max-width:320px}
+.tbl tr:hover td{background:var(--surface-2)}
+.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.hist-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;padding:8px 0;border-top:1px solid var(--line)}
+.hist-item:first-child{border-top:0}
+.tag-new{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange)}
+.mini{border:1px solid var(--line);border-radius:8px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0;background:var(--surface);cursor:pointer;transition:border-color .12s}
+.mini:hover{border-color:var(--green)}
+.mini[aria-pressed="true"]{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.mini-c{position:relative;width:92px;height:92px}
+.mini-n{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:20px;pointer-events:none}
+.mini-t{font-size:12px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.mode{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:600;background:rgba(255,255,255,.12);color:var(--band-fg)}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap" style="padding-block:18px">
+    <div class="max-w-[1400px] mx-auto flex flex-wrap items-end justify-between gap-3">
+      <div class="minw0">
+        <div class="label" style="color:#9fd8b8">Fiber Centro · Inteligencia Comercial</div>
+        <h1 class="display text-2xl sm:text-3xl font-extrabold mt-1">Tablero de Ventas y Liquidaciones</h1>
+      </div>
+      <div class="flex flex-col items-end gap-1.5">
+        <span id="modeBadge" class="mode" hidden=""></span>
+        <div id="loadStatus" class="mono text-xs" style="color:#b9dcc8">Sin datos cargados</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-block:20px 40px">
+  <div class="max-w-[1400px] mx-auto grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+
+    <!-- ================= COLUMNA LATERAL ================= -->
+    <aside class="flex flex-col gap-5 minw0">
+      <section id="loadPanel" class="panel p-4 flex flex-col gap-3" aria-labelledby="h-carga">
+        <div>
+          <h2 id="h-carga" class="display text-base font-bold">Carga de datos</h2>
+          <p class="muted text-xs mt-1">Copia el rango en Excel con la fila de encabezados y pégalo aquí. Al procesar, el mes se guarda en este navegador. Para que el equipo lo vea, descarga el tablero actualizado y reemplaza el archivo compartido.</p>
+        </div>
+        <div id="replaceBanner" class="msg msg-warn" hidden=""></div>
+        <textarea id="excelInput" class="ta w-full p-3" rows="7" spellcheck="false" placeholder="ORDEN	SERVICIO	FECHA DE ORDEN	FECHA LIQUIDACION	…	MES"></textarea>
+        <div class="flex gap-2">
+          <button id="btnProcess" class="btn-primary flex-1 px-4 py-2.5 text-sm">Procesar Datos de Excel</button>
+          <button id="btnClearInput" class="btn-ghost px-3 py-2.5 text-sm">Limpiar</button>
+        </div>
+        <div id="parseMsg" hidden=""></div>
+        <div class="flex flex-col gap-2 pt-3" style="border-top:1px solid var(--line)">
+          <div class="label">Traer datos de un tablero anterior</div>
+          <label class="btn-ghost px-3 py-2 text-sm text-center cursor-pointer" for="importFile">Abrir tablero descargado (.html)</label>
+          <input id="importFile" type="file" accept=".html,text/html" class="sr-only">
+          <p class="text-xs muted">Úsalo si abriste esta versión en otra computadora: elige tu último tablero descargado y sus meses se copian aquí.</p>
+        </div>
+        <div class="flex flex-col gap-2 pt-3" style="border-top:1px solid var(--line)">
+          <div class="label">Publicar para el equipo</div>
+          <button id="btnExport" class="btn-primary px-3 py-2.5 text-sm" disabled="">Descargar tablero actualizado (.html)</button>
+          <p id="exportNote" class="text-xs muted">Carga al menos un mes para generar el archivo.</p>
+        </div>
+        <div id="pendingBox" class="flex flex-col gap-2" hidden="">
+          <div class="label">Meses sin guardar</div>
+          <div id="pendingList" class="flex flex-col text-sm"></div>
+          <div class="flex gap-2">
+            <button id="btnSave" class="btn-primary flex-1 px-3 py-2 text-sm">Guardar en historial</button>
+            <button id="btnDiscard" class="btn-ghost px-3 py-2 text-sm">Descartar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel p-4 flex flex-col gap-2" aria-labelledby="h-hist">
+        <div class="flex items-center justify-between gap-2">
+          <h2 id="h-hist" class="display text-base font-bold">Meses en este tablero</h2>
+          <span id="histCount" class="mono text-xs muted"></span>
+        </div>
+        <p id="histStatus" class="text-xs muted">Conectando con el historial…</p>
+        <div id="histList" class="flex flex-col"></div>
+        <p class="text-[11px] muted mt-1">Si un mes ya existe, al guardarlo de nuevo se reemplaza. Si cargarás más de 12 meses, incluye el año en la columna MES (por ejemplo, OCTUBRE 2026).</p>
+      </section>
+
+      <section class="panel p-4 flex flex-col gap-4" aria-labelledby="h-filtros">
+        <div class="flex items-center justify-between gap-2">
+          <h2 id="h-filtros" class="display text-base font-bold">Segmentadores</h2>
+          <button id="btnClearFilters" class="btn-link" hidden="">Quitar filtros</button>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="mesSelect" class="label">Mes</label>
+          <select id="mesSelect" class="sel px-3 py-2 text-sm" disabled=""><option value="">Esperando carga de datos…</option></select>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="dniSearch" class="label">DNI o cliente</label>
+          <input id="dniSearch" class="inp px-3 py-2 text-sm mono" type="search" inputmode="search" placeholder="Ej. 45781236 o apellido" autocomplete="off" disabled="">
+        </div>
+        <div class="flex flex-col gap-2"><div class="label">Servicio</div><div id="f-SERVICIO" class="chiplist"><span class="muted text-xs">Se generará al procesar los datos.</span></div></div>
+        <div class="flex flex-col gap-2"><div class="label">Distrito</div><div id="f-DISTRITO" class="chiplist"><span class="muted text-xs">Se generará al procesar los datos.</span></div></div>
+        <div class="flex flex-col gap-2"><div class="label">Asesor</div><div id="f-ASESOR" class="chiplist"><span class="muted text-xs">Se generará al procesar los datos.</span></div>
+          <p id="asesorLink" class="msg msg-ok" hidden=""></p></div>
+        <div class="flex flex-col gap-2"><div class="label">Plan</div><div id="f-PLAN" class="chiplist"><span class="muted text-xs">Se generará al procesar los datos.</span></div></div>
+        <div class="flex flex-col gap-2"><div class="label">Origen</div><div id="f-ORIGEN" class="chiplist"><span class="muted text-xs">Se generará al procesar los datos.</span></div></div>
+      </section>
+    </aside>
+
+    <!-- ================= ÁREA PRINCIPAL ================= -->
+    <div class="flex flex-col gap-5 minw0">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div id="activeFilters" class="text-xs muted minw0">Vista: todos los registros</div>
+        <div class="flex items-center gap-2">
+          <span class="label">Base de cálculo</span>
+          <div class="seg" role="group" aria-label="Base de cálculo">
+            <button id="baseLiq" aria-pressed="true">Liquidados</button>
+            <button id="baseAll" aria-pressed="false">Todas las órdenes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ficha de cliente (aparece al buscar un DNI) -->
+      <section id="clientCard" class="panel p-4" hidden=""></section>
+
+      <!-- KPIs -->
+      <section class="grid gap-3 grid-cols-2 xl:grid-cols-4" aria-label="Indicadores">
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Ingresos Totales</div><div id="kIng" class="kpi-val">S/. 0.00</div><div id="kIngS" class="text-xs muted">Suma de PAGO DE PLAN</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Contratos Liquidados</div><div id="kLiq" class="kpi-val">0</div><div id="kLiqS" class="text-xs muted">de 0 órdenes registradas</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Crecimiento Mes a Mes</div><div class="flex items-baseline gap-2 flex-wrap"><div id="kMom" class="kpi-val">--%</div><span id="kMomP" class="pill pill-flat" hidden=""></span></div><div id="kMomS" class="text-xs muted">Ingresos vs. mes anterior</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Ticket Promedio</div><div id="kTic" class="kpi-val">S/. 0.00</div><div id="kTicS" class="text-xs muted">Pago promedio por contrato</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Tasa de Liquidación</div><div id="kTasa" class="kpi-val">--%</div><div id="kTasaS" class="text-xs muted">Liquidados sobre órdenes</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Reprogramaciones</div><div id="kRep" class="kpi-val">0</div><div id="kRepS" class="text-xs muted">Órdenes con reprogramación</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Días a Liquidar</div><div id="kDias" class="kpi-val">--</div><div id="kDiasS" class="text-xs muted">Promedio entre orden y liquidación</div></div>
+        <div class="panel p-4 flex flex-col gap-2"><div class="label">Clientes Únicos</div><div id="kCli" class="kpi-val">0</div><div id="kCliS" class="text-xs muted">DNI distintos</div></div>
+      </section>
+
+      <!-- Tendencia mensual -->
+      <section class="panel p-4 sm:p-5 flex flex-col gap-4" aria-labelledby="h-trend">
+        <div>
+          <h2 id="h-trend" class="display text-lg font-bold">Evolución mensual</h2>
+          <p class="text-xs muted mt-0.5">Ingresos (barras azules) y contratos liquidados (línea naranja) en todos los meses guardados y cargados. Respeta los segmentadores salvo el de mes.</p>
+        </div>
+        <div id="trendEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+        <div id="trendWrap" style="position:relative;height:280px" hidden=""><canvas id="trendChart" role="img" aria-label="Evolución mensual"></canvas></div>
+      </section>
+
+      <!-- Comparativo entre meses -->
+      <section class="panel p-4 sm:p-5 flex flex-col gap-4" aria-labelledby="h-cmp">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="h-cmp" class="display text-lg font-bold">Comparativo entre meses</h2>
+            <p class="text-xs muted mt-0.5">Elige dos meses para ver la variación de cada indicador y por segmento.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="text-xs muted" for="cmpA">Mes A</label>
+            <select id="cmpA" class="sel px-2 py-1.5 text-sm" disabled=""></select>
+            <span class="muted">vs.</span>
+            <label class="text-xs muted" for="cmpB">Mes B</label>
+            <select id="cmpB" class="sel px-2 py-1.5 text-sm" disabled=""></select>
+          </div>
+        </div>
+        <div id="cmpEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span><span class="text-xs">Se necesitan al menos dos meses.</span></div>
+        <div id="cmpBody" class="grid gap-5 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]" hidden="">
+          <div class="tbl-wrap minw0"><table class="tbl" id="cmpTable"></table></div>
+          <div class="flex flex-col gap-3 minw0">
+            <div class="flex flex-wrap items-center gap-2">
+              <label for="cmpDim" class="text-xs muted">Segmento</label>
+              <select id="cmpDim" class="sel px-2 py-1.5 text-sm">
+                <option value="ASESOR">Asesor</option><option value="DISTRITO">Distrito</option><option value="PLAN">Plan</option><option value="SERVICIO">Servicio</option><option value="ORIGEN">Origen</option>
+              </select>
+              <label for="cmpMetric" class="text-xs muted">Medida</label>
+              <select id="cmpMetric" class="sel px-2 py-1.5 text-sm">
+                <option value="ing">Ingresos</option><option value="cnt">Contratos</option>
+              </select>
+            </div>
+            <div id="cmpWrap" style="position:relative;height:320px"><canvas id="cmpChart" role="img" aria-label="Comparativo por segmento"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Densidad distritos -->
+      <section class="panel p-4 sm:p-5 flex flex-col gap-4" aria-labelledby="h-heat">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="h-heat" class="display text-lg font-bold">Densidad por distrito</h2>
+            <p class="text-xs muted mt-0.5">Ingresos generados por zona, de mayor a menor.</p>
+          </div>
+          <div class="flex flex-col gap-1 w-44">
+            <div class="legend-bar"></div>
+            <div class="flex justify-between text-[11px] muted"><span>Zona fría</span><span>Alto volumen</span></div>
+          </div>
+        </div>
+        <div id="heatEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+        <div id="heatList" class="flex flex-col gap-3" hidden=""></div>
+      </section>
+
+      <!-- Instalaciones por distrito (gráficos circulares) -->
+      <section class="panel p-4 sm:p-5 flex flex-col gap-4" aria-labelledby="h-dpie">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="h-dpie" class="display text-lg font-bold">Instalaciones por distrito</h2>
+            <p class="text-xs muted mt-0.5">Contratos liquidados por distrito y, en cada círculo, su composición por tipo de servicio. Pulsa un distrito para filtrarlo.</p>
+          </div>
+          <div id="tipoLegend" class="flex flex-wrap gap-3 text-xs"></div>
+        </div>
+        <div id="dpieEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+        <div id="dpieWrap" class="grid gap-5 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]" hidden="">
+          <div class="flex flex-col gap-2 minw0">
+            <div class="label">Participación de cada distrito</div>
+            <div style="position:relative;height:340px"><canvas id="dpieChart" role="img" aria-label="Instalaciones por distrito"></canvas></div>
+          </div>
+          <div class="flex flex-col gap-2 minw0">
+            <div class="label">Detalle por distrito</div>
+            <div id="dpieGrid" class="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 content-start" style="max-height:440px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid gap-5 xl:grid-cols-2">
+        <section class="panel p-4 sm:p-5 flex flex-col gap-4 minw0" aria-labelledby="h-ases">
+          <div>
+            <h2 id="h-ases" class="display text-lg font-bold">Rendimiento de asesores</h2>
+            <p class="text-xs muted mt-0.5">Contratos liquidados (verde) y órdenes pendientes (naranja), ordenados por liquidados.</p>
+          </div>
+          <div id="asesEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+          <div id="asesWrap" style="position:relative;height:260px" hidden=""><canvas id="asesChart" role="img" aria-label="Contratos por asesor"></canvas></div>
+        </section>
+        <section class="panel p-4 sm:p-5 flex flex-col gap-4 minw0" aria-labelledby="h-plan">
+          <div>
+            <h2 id="h-plan" class="display text-lg font-bold">Distribución de planes de internet</h2>
+            <p id="planSub" class="text-xs muted mt-0.5">Volumen de ventas por velocidad o tipo de plan.</p>
+          </div>
+          <div id="planEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+          <div id="planWrap" style="position:relative;height:300px" hidden=""><canvas id="planChart" role="img" aria-label="Ventas por plan"></canvas></div>
+        </section>
+      </div>
+
+      <div class="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+        <section class="panel p-4 sm:p-5 flex flex-col gap-4 minw0" aria-labelledby="h-serv">
+          <div><h2 id="h-serv" class="display text-lg font-bold">Mix de servicios</h2><p class="text-xs muted mt-0.5">Participación de cada servicio en las ventas.</p></div>
+          <div id="servEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+          <div id="servWrap" style="position:relative;height:260px" hidden=""><canvas id="servChart" role="img" aria-label="Mix de servicios"></canvas></div>
+        </section>
+        <section class="panel p-4 sm:p-5 flex flex-col gap-4 minw0" aria-labelledby="h-orig">
+          <div><h2 id="h-orig" class="display text-lg font-bold">Canales de origen</h2><p class="text-xs muted mt-0.5">Ventas e ingresos por canal de captación.</p></div>
+          <div id="origEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+          <div id="origWrap" style="position:relative;height:260px" hidden=""><canvas id="origChart" role="img" aria-label="Ventas por origen"></canvas></div>
+        </section>
+        <section class="panel p-4 sm:p-5 flex flex-col gap-4 minw0" aria-labelledby="h-time">
+          <div><h2 id="h-time" class="display text-lg font-bold">Tiempo de liquidación</h2><p class="text-xs muted mt-0.5">Días entre la fecha de orden y la de liquidación.</p></div>
+          <div id="timeEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+          <div id="timeWrap" style="position:relative;height:260px" hidden=""><canvas id="timeChart" role="img" aria-label="Distribución de días a liquidar"></canvas></div>
+        </section>
+      </div>
+
+      <!-- Detalle de clientes -->
+      <section class="panel p-4 sm:p-5 flex flex-col gap-4" aria-labelledby="h-det">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="h-det" class="display text-lg font-bold">Detalle de órdenes y clientes</h2>
+            <p id="detSub" class="text-xs muted mt-0.5">Registros que cumplen los filtros activos.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <button id="pgPrev" class="btn-ghost px-2.5 py-1.5" disabled="">Anterior</button>
+            <span id="pgInfo" class="mono muted">0 / 0</span>
+            <button id="pgNext" class="btn-ghost px-2.5 py-1.5" disabled="">Siguiente</button>
+          </div>
+        </div>
+        <div id="detEmpty" class="empty"><span class="dot"></span><span>Esperando carga de datos de Excel...</span></div>
+        <div id="detWrap" class="tbl-wrap" style="max-height:520px;overflow:auto" hidden=""><table class="tbl" id="detTable"></table></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="footer wrap" style="padding-block:16px 28px">
+  <div class="max-w-[1400px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs muted">
+    <span id="genInfo">Fiber Centro · Tablero de ventas</span>
+    <button id="btnAdmin" class="btn-link">Administrar datos</button>
+  </div>
+</footer>
+
+<script id="datos-tablero" type="application/json">{"generado":"2026-11-18T17:25:07.642Z","meses":{"SEPTIEMBRE":{"label":"SEPTIEMBRE","guardado":"2026-11-18T17:24:56.062Z","filas":["IFC0003333\tINTERNET\t2/09/2026\t2/09/2026\tJOSE JAMPIER URETA SALAS\t76005618\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003356\tINTERNET\t3/09/2026\t4/09/2026\tYORDY JOEL ROBLES LEIVA\t72702989\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003379\tINTERNET\t5/09/2026\t7/09/2026\tANA BEATRIZ CASTAÑEDA RICRA\t48199925\tHUALHUAS\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003392\tINTERNET\t7/09/2026\t7/09/2026\tMALCOM STIVEN REYNOSO BLAS\t74158051\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003412\tINTERNET\t8/09/2026\t9/09/2026\tMIRIAM YENY VENTURA GUERRA -2DA LINEA\t19970797\tSAN JERONIMO\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003426\tINTERNET\t9/09/2026\t10/09/2026\tMANUEL ZENON ZARATE MERCADO\t76427290\tS.A.de Cajas\tS/ 50.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003429\tINTERNET\t10/09/2026\t10/09/2026\tJHAMPOOL JHUNIOR CHACON CARBAJAL\t74139699\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003435\tINTERNET\t10/09/2026\t10/09/2026\tANDERSON DARWIN ROJAS VERDE\t73315687\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003436\tINTERNET\t10/09/2026\t11/09/2026\tKATERIN VERÓNICA GUILLEN CÓRDOVA - 2DA LINEA\t44588689\tEL TAMBO\tS/ 25.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tSe aplico la promoción del 50%\tSEPTIEMBRE","IFC0003444\tINTERNET\t11/09/2026\t11/09/2026\tYAMPIER ESMIL HNOSTROZA ORE\t71592048\tCONCEPCIÓN\tS/ 90.00\t600Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003423\tINTERNET\t9/09/2026\t12/09/2026\tGRACIELA HERRERA ZUASNABAR - 2DA LÍNEA\t42316493b\tEL TAMBO\tS/ 50.00\t300Mbps\tCAMPO\tLIDIA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003673\tINTERNET\t28/09/2026\t29/09/2026\tANTHONY ZUÑIGA PORTOCARRERO\t73677054\tQUILCAS\tS/ 50.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003370\tINTERNET\t4/09/2026\t5/09/2026\tROYNINO MARTÍNEZ VENTURA\t43537117\tEL TAMBO\tS/ 70.00\t600Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003485\tINTERNET\t14/09/2026\t15/09/2026\tDAVID LENIN JUIPA TORRES\t76376175\tS.A.de Cajas\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003517\tINTERNET\t16/09/2026\t17/09/2026\tYERSON EDGAR ALIAGA CHAVARRIA - 2DA LÍNEA\t73596017\tCONCEPCIÓN\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003534\tINTERNET\t17/09/2026\t18/09/2026\tELIZABETH SARITA AYALA LEIVA\t43446531b\tSAN JERONIMO\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003543\tINTERNET\t18/09/2026\t19/09/2026\tMERGILDA ANCELMA MELENDRES DE LA CRUZ\t20439979\tSAN JERONIMO\tS/ 50.00\t300Mbps\tCAMPO\tTEC.JOSUE\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003544\tINTERNET\t18/09/2026\t19/09/2026\tMAX JHULER SARMIENTO ROJAS\t73036093\tHUALHUAS\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003554\tINTERNET\t21/09/2026\t22/09/2026\tLA FABRICA IMPORTACIOES GUERRA ACOSTA\t20614737019\tSAN JERONIMO\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003634\tINTERNET\t24/09/2026\t25/09/2026\tJULIO CESAR MENDOZA YURIVILCA\t21111346\tEL TAMBO\tS/ 80.00\tDuo Premium 300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tEl cliente adquirio un TV BOX\tSEPTIEMBRE","IFC0003635\tINTERNET\t25/09/2026\t27/09/2026\tMELINA MEZA RICALDI\t80633772\tHUALHUAS\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003282\tINTERNET\t29/08/2026\t1/09/2026\tCLARA JUANA CASO MARTINEZ\t42554992\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003330\tINTERNET\t2/09/2026\t2/09/2026\tGRACIELA HERRERA ZUASNABAR\t42316493\tHUALHUAS\tS/ 50.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003255\tINTERNET\t27/08/2026\t3/09/2026\tPOOLL ANGEL ASTAHUAMAN GRADOS\t74620491\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003344\tINTERNET\t3/09/2026\t3/09/2026\tMUCHA LOPEZ MARCO ANTONIO\t10201006673\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003364\tINTERNET\t4/09/2026\t4/09/2026\tMILARDIS KAORI ZUMAETA RIVERA\t61517977\tS.A.de Cajas\tS/ 90.00\tPlan estandar 600Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tEl cliente adquirio un TV BOX\tSEPTIEMBRE","IFC0003363\tINTERNET\t4/09/2026\t5/09/2026\tYUDY FLORENCIA VELASQUE BRAVO\t74386568\tS.A.de Cajas\tS/ 25.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IPTVFC0003369\tCABLE\t4/09/2026\t7/09/2026\tJHORDAN JOSE PEREZ ORE\t20423845\tMATAHUASI\tS/ 60.00\tIPTV BASICO\tOFICINA\tALMENDRA\tSI\tNO\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003389\tINTERNET\t7/09/2026\t7/09/2026\tISAAC DANNY PARIACHI BÓRQUEZ\t62232527\tMATAHUASI\tS/ 70.00\t300Mbps\tCAMPO\tTEC.JOSUE\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003416\tINTERNET\t9/09/2026\t9/09/2026\tMELSI VIVIANA VALENCIA QUISPELAYA -2DA LÍNEA\t71887735\tMATAHUASI\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003430\tINTERNET\t10/09/2026\t11/09/2026\tWILFREDO RAMON COSSER TORIBIO\t20043919\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003467\tINTERNET\t13/09/2026\t15/09/2026\tMULTISERVICIOS CALEP S.R.L.\t20541560492 T - 20AVA\tEL TAMBO\tS/ 70.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tEl cliente adquirio el servicio de telefono fijo\tSEPTIEMBRE","IFC0003466\tINTERNET\t13/09/2026\t15/09/2026\tMULTISERVICIOS CALEP S.R.L.\t20541560492 S - 19AVA\tEL TAMBO\tS/ 70.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tEl cliente adquirio el servicio de telefono fijo\tSEPTIEMBRE","IPTVFC0003493\tCABLE\t15/09/2026\t15/09/2026\tGERSON ORIHUELA PEREZ\t76311328\tMATAHUASI\tS/ 50.00\tIPTV BASICO\tOFICINA\tALMENDRA\tSI\tNO\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003505\tINTERNET\t16/09/2026\t16/09/2026\tCONSORCIO SAÑOS\t20616366824\tS.PEDRO DE SAÑOS\tS/ 70.00\t600Mbps\tEXTERNO\tCARLOS\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003521\tINTERNET\t16/09/2026\t17/09/2026\tJUDITH MÓNICA PAUCAR VILCAPOMA\t72408698\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003562\tINTERNET\t20/09/2026\t21/09/2026\tANGIE ANDREA NATALY TORIBIO ROJAS\t60621941\tSAN JERONIMO\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003553\tINTERNET\t19/09/2026\t22/09/2026\tEDGAR VARGAS DE LA CRUZ\t43991645\tJAUJA\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003599\tINTERNET\t21/09/2026\t22/09/2026\tJULIA NERIDA DE LA CRUZ HINOSTROZA\t20420809\tCONCEPCIÓN\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003623\tINTERNET\t23/09/2026\t23/09/2026\tSOLEDAD MARITZA RODRIGUEZ PARIONA\t44720069\tHUALHUAS\tS/ 25.00\t300Mbps\tCAMPO\tLIDIA\tNO\tSI\tSI\tNO\tSe le está brindando una promoción del 50% de descuento por un mes.\tSEPTIEMBRE","IFC0003631\tINTERNET\t24/09/2026\t24/09/2026\tYUDDI MARITZA ROSALES ARELLANO\t41156310\tHUALHUAS\tS/ 25.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tSe está aplicando el descuento del 50% por motivo de llenar las cajas vacías.\tSEPTIEMBRE","IFC0003657\tINTERNET\t26/09/2026\t29/09/2026\tABEL PÉREZ SAMANIEGO\t46762435\tS.A.de Cajas\tS/ 70.00\t600Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IPTVFC0003694\tCABLE\t29/09/2026\t30/09/2026\tBRAYAN JUNIOR LUCIANO AVILA\t70117475\tEL TAMBO\tS/ 20.00\tIPTV BASICO\tOFICINA\tMKT- JEFFREY\tSI\tNO\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003684\tINTERNET\t29/09/2026\t29/09/2026\tJOSE LUIS TORRES JAUREGUI\t45463548\tYANAMUCLO\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tSEPTIEMBRE","IFC0003685\tINTERNET\t29/09/2026\t29/09/2026\tJAVIER TORRES JAUREGUI\t46393410\tYANAMUCLO\tS/ 25.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tSe está aplicando el descuento del 50% por motivo de llenar las cajas vacías.\tSEPTIEMBRE","IFC0003697\tINTERNET\t29/09/2026\t30/09/2026\tGLADYS MARLENE MEZA SALINAS\t19895917\tS.A.de Cajas\tS/ 25.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tSe le está brindando una promoción del 50% de descuento por un mes.\tSEPTIEMBRE"]},"OCTUBRE":{"label":"OCTUBRE","guardado":"2026-11-18T17:25:07.642Z","filas":["IFC0003713\tINTERNET\t30/09/2026\t1/10/2026\tYAMPOL YUNIOR MORALES HINOSTROZA\t75084394\tMATAHUASI\tS/ 50.00\t300Mbps\tEXTERNO\tYESSER\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003697\tINTERNET\t29/09/2026\t1/10/2026\tGLADYS MARLENE MEZA SALINAS\t19895917\tS.A.de Cajas\tS/ 25.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003723\tINTERNET\t1/10/2026\t1/10/2026\tRUTH ISABEL HUAMAN HUAMANI\t76321235\tS.A.de Cajas\tS/ 50.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003719\tINTERNET\t1/10/2026\t2/10/2026\tJOHAN JANSER VELIZ HUANCA\t60616020\tS.PEDRO DE SAÑOS\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003722\tINTERNET\t1/10/2026\t2/10/2026\tELIO RODRIGUEZ FERNÁNDEZ VILLANUEVA\t73802552\tSAN JERONIMO\tS/ 90.00\t1000Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003693\tINTERNET\t29/09/2026\t2/10/2026\tDAVID JHONATAN HUAIRE RAMON\t45486289\tEL TAMBO\tS/ 58.33\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tEsta pagando exceso de cableado que lo cancelara en tres partes.\tOCTUBRE","IPTVFC0003721\tCABLE\t1/10/2026\t5/10/2026\tJORGE ENRIQUE RAMOS BARZOLA\t42865825\tS.A.de Cajas\tS/ 40.00\tIPTV PREMIUM\tOFICINA\tLISMELINA\tSI\tNO\tSI\tNO\tNinguna\tOCTUBRE","IPTVFC0003762\tCABLE\t3/10/2026\t6/10/2026\tERNESTO MANUEL GUTIERREZ ZUASNAVAR\t46967266\tS.A.de Cajas\tS/ 40.00\tIPTV BASICO\tOFICINA\tLUZ\tSI\tNO\tSI\tNO\tNinguna\tOCTUBRE","IFC0003790\tINTERNET\t6/10/2026\t7/10/2026\tJAIME ALMONACID CARUABILCA\t40805930\tMATAHUASI\tS/ 25.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tSe le brindo la promoción del 50%\tOCTUBRE","IPTVFC0003794\tCABLE\t6/10/2026\t7/10/2026\tJESSICA MARLENY HUAMANCHAQUI ROJAS\t46728036\tSAN JERONIMO\tS/ 30.00\tIPTV BASICO\tOFICINA\tALMENDRA\tSI\tNO\tSI\tNO\tNinguna\tOCTUBRE","IFC0003659\tINTERNET\t26/09/2026\t1/10/2026\tAMERICO CALDERON CHAHUAYA\t21259230\tSAN JERONIMO\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003695\tINTERNET\t29/09/2026\t1/10/2026\tELIZABETH SEDANO ROJAS\t44871770\tEL TAMBO\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003712\tINTERNET\t30/09/2026\t1/10/2026\tJUDHY PÉREZ HUAYNATE\t41608709\tEL TAMBO\tS/ 90.00\tPlan estandar 600Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tA la cliente se le brindo dos puntos adicionales totalmente gratis.\tOCTUBRE","IFC0003717\tINTERNET\t1/10/2026\t2/10/2026\tDONNIE DEYVIS ACUÑA CAPCHA\t44549644\tHUALHUAS\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003725\tINTERNET\t1/10/2026\t2/10/2026\tMERY MELINA OSORIO TAQUIRE\t77077425\tHUALHUAS\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003731\tINTERNET\t1/10/2026\t3/10/2026\tPEDRO RIVERA BRICEÑO\t43349727\tHUALHUAS\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003772\tINTERNET\t5/10/2026\t5/10/2026\tMEZA PAUCAR YAN CARLOS\t48036437\tEL TAMBO\tS/ 225.00\t100Mbps\tEXTERNO\tMIGUEL\tNO\tSI\tSI\tNO\tInternet empresarial\tOCTUBRE","IFC0003788\tINTERNET\t6/10/2026\t6/10/2026\tBRENER JOSUÉ MEZA ROSALES\t75872195\tSAN JERONIMO\tS/ 70.00\t600Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003823\tINTERNET\t9/10/2026\t9/10/2026\tJAIME SERGIO BONIFACIO PEREZ\t19942667\tQUILCAS\tS/ 60.00\t300Mbps\tCAMPO\tROSAURA\tSI\tSI\tSI\tNO\tSe le esta brindando cable gratis por 6 meses renovables\tOCTUBRE","IFC0003806\tINTERNET\t7/10/2026\t12/10/2026\tWILFREDO HUARCAYA CCAMA\t44259405\tS.A.de Cajas\tS/ 90.00\tPlan estandar 600Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003851\tINTERNET\t12/10/2026\t13/10/2026\tROCIO MARGOT FLORES INDIGOYEN\t80430840\tEL TAMBO\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003733\tINTERNET\t2/10/2026\t2/10/2026\tJOSE LUIS ANCHIRAICO GUTIERREZ\t76469910\tSAN JERONIMO\tS/ 100.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tSe le esta cobrando exceso de cableado.\tOCTUBRE","IFC0003835\tINTERNET\t10/10/2026\t10/10/2026\tROCIO DEL PILAR LLANOS BELTRAN\t74054289\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003834\tINTERNET\t10/10/2026\t12/10/2026\tMARCO ANTONIO LAIMITO VEGA\t19970334\tSAN JERONIMO\tS/ 50.00\t300Mbps\tOFICINA\tLUZ\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003850\tINTERNET\t12/10/2026\t12/10/2026\tCARMEN JUDITH REVOLO PAUCAR\t74481318\tS.A.de Cajas\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tROSAURA\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003849\tINTERNET\t12/10/2026\t13/10/2026\tALEX ALANYA ESPIRITU\t41176652\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tLISMELINA\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003859\tINTERNET\t12/10/2026\t13/10/2026\tHECTOR JULIO MEZA CABANILLAS\t44363087\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tALMENDRA\tSI\tSI\tSI\tNO\tSe le brindo cable tv por 3 meses gratis\tOCTUBRE","IPTVFC0003882\tCABLE\t14/10/2026\t15/10/2026\tGODIÑO JAVIER ANA MARIA\t21259499\tEL TAMBO\tS/ 60.00\tIPTV BASICO\tOFICINA\tLISMELINA\tSI\tNO\tSI\tNO\tSe esta cobrando costo de instalación\tOCTUBRE","IFC0003903\tINTERNET\t15/10/2026\t16/10/2026\tVIANCA LUCERO VILLANUEVA MARTINEZ\t75236573\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003853\tINTERNET\t12/10/2026\t13/10/2026\tHERMINIA NORA HURTADO MAMANI\t20097889\tS.PEDRO DE SAÑOS\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003852\tINTERNET\t12/10/2026\t13/10/2026\tROSMERY MELVA CRISPIN CABRERA\t71975292\tQUILCAS\tS/ 35.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tSe le brindo el 50%de descuento por dos meses a la cliente,ademas que esta pagando exceso de cableado.\tOCTUBRE","IFC0003880\tINTERNET\t14/10/2026\t14/10/2026\tPATRICIA LILIANA GARCIA VILLANUEVA\t46049967\tSAN JERONIMO\tS/ 50.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003867\tINTERNET\t13/10/2026\t14/10/2026\tABDIEL EDUARDO BUSTAMANTE MARCELO\t77708160\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003889\tINTERNET\t14/10/2026\t16/10/2026\tMARCELA EDA ZACARIAS CARDENAS\t19965129\tHUALHUAS\tS/ 50.00\t300Mbps\tEXTERNO\tJUAN PARRAGA\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003870\tINTERNET\t13/10/2026\t16/10/2026\tLINCOL ESTEBAN ROSALES\t45298467\tSAN JERONIMO\tS/ 70.00\t600Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003868\tINTERNET\t13/10/2026\t15/10/2026\tMARISET MADAY PANEZ SANCHEZ\t74378969\tJAUJA\tS/ 25.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tEl cliente pago 25 soles debido a que iba desistir por la demora.\tOCTUBRE","IFC0003916\tINTERNET\t16/10/2026\t16/10/2026\tISRAEL MARTI RODRIGUEZ VILCHEZ\t74537548\tS.A.de Cajas\tS/ 50.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003877\tINTERNET\t13/10/2026\t17/10/2026\tDAVID EDILBERTO GONZALES CALDERON\t47494813\tSAN JERONIMO\tS/ 70.00\tDuo Basico 300Mbps\tCAMPO\tROSAURA\tSI\tSI\tSI\tNO\tEl cliente esta adquiriendo en calidad de compra dos tvbox\tOCTUBRE","IFC0003920\tINTERNET\t16/10/2026\t17/10/2026\tARTURO MAC RURUSH GUTIERREZ\t43140333\tHUALHUAS\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tSe le esta otorgando cable gratis por 3 meses renovables bajo pagos puntuales.\tOCTUBRE","IPTVFC0003917\tCABLE\t16/10/2026\t20/10/2026\tNIEVES VIOLETA ILDEFONSO QUISPE\t20714846\tJAUJA\tS/ 20.00\tIPTV BASICO\tOFICINA\tLISMELINA\tSI\tNO\tSI\tNO\tEl cliente adquirio un tv boz en calidad de compra se le dejo a 95 soles.\tOCTUBRE","IFC0003949\tINTERNET\t19/10/2026\t20/10/2026\tROSA MARIA BALDEON LAIME\t48497935\tJAUJA\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003948\tINTERNET\t19/10/2026\t20/10/2026\tGEAN CARLOS YEMERSON QUISPE MAMANI\t75018039\tJAUJA\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003846\tINTERNET\t12/10/2026\t19/10/2026\tROSA LUZ HUARIPAITA IBARRA\t20100966\tEL TAMBO\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tAl cliente se le esta brindando cabl tv gratis por 6 meses debido a que se demoraron varios días en realizar la instalación 7 dias.\tOCTUBRE","IFC0003965\tINTERNET\t20/10/2026\t21/10/2026\tROMULO DAVID RAMOS ESPEJO\t40190538\tJAUJA\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0004015\tINTERNET\t24/10/2026\t24/10/2026\tLUZ MERY ASTOÑAUPA AVILA\t75695723\tS.PEDRO DE SAÑOS\tS/ 50.00\t300Mbps\tCAMPO\tLIDIA\tNO\tSI\tSI\tNO\tSe le esta brindando cable gratis por 3 meses gratis.\tOCTUBRE","IFC-202610-000011\tINTERNET\t27/10/2026\t28/10/2026\tJHEFERSON JHOEL MEZA ARANDA\t76366654\tSAN JERONIMO\tS/ 25.00\t300Mbps\tCAMPO\tROSAURA\tNO\tSI\tSI\tNO\tSe le esta brindando el descuento del 50% por dos meses.\tOCTUBRE","IFC-202610-000033\tINTERNET\t28/10/2026\t29/10/2026\tPAUL JAMES GUADALUPE GUERRA\t44080391\tJAUJA\tS/ 25.00\t300Mbps\tCAMPO\tANGY\tNO\tSI\tSI\tNO\tSe le esta brindando el descuento del 50% por dos meses.\tOCTUBRE","IFC0003966\tINTERNET\t20/10/2026\t21/10/2026\tANTONY SOTOMAYOR SALOME\t75414223\tS.A.de Cajas\tS/ 50.00\t300Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC0003999\tINTERNET\t22/10/2026\t23/10/2026\tPILAR NOEMI ARTICA DAVILA\t46624750\tEL TAMBO\tS/ 70.00\t600Mbps\tOFICINA\tMKT- JEFFREY\tNO\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC-202610-000063\tINTERNET\t30/10/2026\t30/10/2026\tELENA MARTINEZ HUAMAN\t21288366\tQUILCAS\tS/ 35.00\tDuo Basico 100Mbps\tCAMPO\tROSAURA\tSI\tSI\tSI\tNO\tSe el esta brindando un plan de 100mbps.\tOCTUBRE","IFC0003847\tINTERNET\t12/10/2026\t29/10/2026\tNOEMI JHOANA DE LA CRUZ BENITO\t71341418\tS.PEDRO DE SAÑOS\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC-202610-000032\tINTERNET\t28/10/2026\t29/10/2026\tHUAYTALLA TORRES VIDAL MANUEL\t20692776\tEL TAMBO\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tCompro un tv box en calidad de compra.\tOCTUBRE","IFC-202610-000045\tINTERNET\t29/10/2026\t30/10/2026\tGLADYS ESTHER VIDALON DURAN\t20043649\tEL TAMBO\tS/ 70.00\tDuo Basico 300Mbps\tOFICINA\tMKT- JEFFREY\tSI\tSI\tSI\tNO\tNinguna\tOCTUBRE","IFC-202610-000054\tINTERNET\t30/10/2026\t31/10/2026\tADELA DIAZ ALIAGA\t76313154\tS.PEDRO DE SAÑOS\tS/ 25.00\t300Mbps\tCAMPO\tLIDIA\tNO\tSI\tSI\tNO\tSe le esta brindando el descuento del 50% por dos meses.\tOCTUBRE","IFC0004021\tINTERNET\t26/10/2026\t28/10/2026\tRICARDO ROMERO ROJAS\t20094540\tEL TAMBO\tS/ 85.00\tDuo Basico 300Mbps\tOFICINA\tLISMELINA\tSI\tSI\tSI\tNO\tEl cliente esta pagando en tres mensualidades\tOCTUBRE"]}},"exportado":"2026-11-18T17:25:07.642Z"}</script>
+<script>
+/* Copia limpia del documento, usada para generar el archivo descargable */
+const TEMPLATE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+/* =====================================================================
+   1. CONFIGURACIÓN
+   ===================================================================== */
+const COLUMNS = ['ORDEN','SERVICIO','FECHA DE ORDEN','FECHA LIQUIDACION','NOMBRE Y APELLIDOS DEL CLIENTE','DNI','DISTRITO','PAGO DE PLAN','PLAN','ORIGEN','ASESOR','IPTV CABLE','INTERNET','LIQUIDADO','REPROGRAMACION','DESCRIPCION','MES'];
+const CORE = ['DISTRITO','PAGO DE PLAN','PLAN','ASESOR','MES'];
+const FILTER_COLS = ['SERVICIO','DISTRITO','ASESOR','PLAN','ORIGEN'];
+const BLANK = '(Sin dato)';
+const PAGE = 25;
+
+/* =====================================================================
+   2. LIMPIEZA DE DATOS
+   ===================================================================== */
+const Clean = {
+  norm(s){ return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim(); },
+  text(s){ return String(s ?? '').replace(/[ ​﻿]/g,' ').replace(/\s+/g,' ').trim(); },
+  money(raw){
+    let s = Clean.text(raw).toUpperCase().replace(/S\s*\/\s*\.?/g,'').replace(/PEN|SOLES?/g,'');
+    const neg = /^\(.*\)$/.test(s) || /^-/.test(s.replace(/\s/g,''));
+    s = s.replace(/[^0-9.,]/g,'');
+    if(!s) return null;
+    const hasC = s.includes(','), hasD = s.includes('.');
+    if(hasC && hasD){ s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,''); }
+    else if(hasC){ s = /^\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g,'') : s.replace(/,/g,'.'); }
+    else if(hasD && /^\d{1,3}(\.\d{3})+$/.test(s)){ s = s.replace(/\./g,''); }
+    const parts = s.split('.'); if(parts.length > 2) s = parts.slice(0,-1).join('') + '.' + parts.at(-1);
+    const n = parseFloat(s); return isFinite(n) ? (neg ? -n : n) : null;
+  },
+  dni(raw){ const s = Clean.text(raw).replace(/[\s.\-]/g,''); return /^\d{6,7}$/.test(s) ? s.padStart(8,'0') : s; },
+  yes(val){ const v = Clean.norm(val); return !!v && !['NO','N','0','FALSE','FALSO','NINGUNA','NINGUNO','SIN'].includes(v); },
+  isLiquidado(val, fechaLiq){
+    const v = Clean.norm(val);
+    if(v){
+      if(['SI','S','YES','Y','1','TRUE','VERDADERO','X','OK','CONFORME','INSTALADO','INSTALADA','ATENDIDO'].includes(v)) return true;
+      return v.startsWith('LIQUID');
+    }
+    return !!Clean.text(fechaLiq);
+  },
+  date(raw){
+    const s = Clean.text(raw); if(!s) return null;
+    if(/^\d{5}(\.\d+)?$/.test(s)) return Date.UTC(1899,11,30) + Math.floor(+s)*864e5; // número de serie de Excel
+    let m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+    if(m) return Date.UTC(+m[1], +m[2]-1, +m[3]);
+    m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);
+    if(m){ let y = +m[3]; if(y < 100) y += 2000; return Date.UTC(y, +m[2]-1, +m[1]); }
+    return null;
+  }
+};
+const slugOf = label => (Clean.norm(label).replace(/ /g,'-') || 'SIN-MES').slice(0,120);
+
+/* =====================================================================
+   3. PARSER TSV (formato nativo al copiar celdas de Excel)
+   ===================================================================== */
+const Parser = {
+  tsv(text){
+    const rows=[]; let row=[], cell='', q=false;
+    const t = text.replace(/\r\n?/g,'\n');
+    for(let i=0;i<t.length;i++){
+      const c=t[i];
+      if(q){ if(c==='"'){ if(t[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c; }
+      else if(c==='"' && cell==='') q=true;
+      else if(c==='\t'){ row.push(cell); cell=''; }
+      else if(c==='\n'){ row.push(cell); rows.push(row); row=[]; cell=''; }
+      else cell+=c;
+    }
+    row.push(cell); rows.push(row); return rows;
+  },
+  build(text){
+    const raw = Parser.tsv(text);
+    const isEmpty = r => r.every(c => !Clean.text(c));
+    let start = 0; while(start < raw.length && isEmpty(raw[start])) start++;
+    if(start >= raw.length) throw new Error('El cuadro está vacío. Pega el rango copiado desde Excel.');
+    const header = raw[start].map(Clean.norm);
+    if(header.length < 2) throw new Error('No se detectaron columnas separadas por tabulación. Copia las celdas directamente desde Excel.');
+    const idx = {};
+    COLUMNS.forEach(col => { const i = header.indexOf(Clean.norm(col)); if(i>-1) idx[col]=i; });
+    const missing = COLUMNS.filter(c => !(c in idx));
+    const missingCore = CORE.filter(c => !(c in idx));
+    if(missingCore.length) throw new Error('Faltan columnas obligatorias en la primera fila: ' + missingCore.join(', ') + '. Revisa que hayas copiado la fila de encabezados.');
+    if(!('LIQUIDADO' in idx) && !('FECHA LIQUIDACION' in idx)) throw new Error('Se necesita la columna LIQUIDADO o FECHA LIQUIDACION para contar contratos liquidados.');
+    const records=[]; let skipped=0, badMoney=0;
+    for(let r=start+1; r<raw.length; r++){
+      const line = raw[r];
+      if(isEmpty(line)){ skipped++; continue; }
+      const arr = COLUMNS.map(col => col in idx ? Clean.text(line[idx[col]]) : '');
+      const rec = Data.fromArray(arr);
+      if(rec._pagoBad) badMoney++;
+      records.push(rec);
+    }
+    if(!records.length) throw new Error('Se leyeron los encabezados pero no hay filas de datos debajo.');
+    return { records, missing, skipped, badMoney };
+  }
+};
+
+/* =====================================================================
+   4. MODELO DE REGISTRO
+   ===================================================================== */
+const Data = {
+  fromArray(arr){
+    const rec = { _raw: arr };
+    COLUMNS.forEach((c,i) => rec[c] = arr[i] || '');
+    const p = Clean.money(rec['PAGO DE PLAN']);
+    rec._pagoBad = p === null && !!rec['PAGO DE PLAN'];
+    rec._pago = p ?? 0;
+    rec._liq = Clean.isLiquidado(rec['LIQUIDADO'], rec['FECHA LIQUIDACION']);
+    rec._rep = Clean.yes(rec['REPROGRAMACION']);
+    rec.DNI = Clean.dni(rec.DNI);
+    const d0 = Clean.date(rec['FECHA DE ORDEN']), d1 = Clean.date(rec['FECHA LIQUIDACION']);
+    rec._days = (rec._liq && d0 !== null && d1 !== null && d1 >= d0) ? Math.round((d1-d0)/864e5) : null;
+    FILTER_COLS.concat('MES').forEach(c => { if(!rec[c]) rec[c] = BLANK; });
+    rec._slug = slugOf(rec.MES);
+    rec._tipo = Data.tipo(rec);
+    rec._q = Clean.norm(rec.DNI + ' ' + rec['NOMBRE Y APELLIDOS DEL CLIENTE']);
+    return rec;
+  },
+  // tipo de instalación a partir de INTERNET / IPTV CABLE, con SERVICIO como respaldo
+  tipo(r){
+    const net = Clean.yes(r.INTERNET), tv = Clean.yes(r['IPTV CABLE']), sv = Clean.norm(r.SERVICIO);
+    if(net && tv) return 'Internet + TV';
+    if(net || (!tv && sv.includes('INTERNET'))) return 'Solo internet';
+    if(tv || sv.includes('CABLE') || sv.includes('TV')) return 'TV / Cable';
+    return r.SERVICIO && r.SERVICIO !== BLANK ? r.SERVICIO : 'Otro';
+  },
+  // agrupa por mes y unifica la etiqueta visible (OCTUBRE / Octubre -> una sola)
+  groupByMonth(records){
+    const g = new Map();
+    records.forEach(r => { if(!g.has(r._slug)) g.set(r._slug,{label:r.MES,records:[]}); const o=g.get(r._slug); r.MES=o.label; o.records.push(r); });
+    return g;
+  },
+  // filas como texto separado por tabulación, en bloques < ~150 KB
+  chunks(records){
+    const out=[]; let cur=[], size=0;
+    records.forEach(r => { const line = r._raw.join('\t'); if(size + line.length > 150000 && cur.length){ out.push(cur); cur=[]; size=0; } cur.push(line); size += line.length + 4; });
+    if(cur.length) out.push(cur); return out;
+  }
+};
+
+/* =====================================================================
+   5. MESES: orden cronológico
+   ===================================================================== */
+const Months = {
+  map:{ENERO:1,ENE:1,FEBRERO:2,FEB:2,MARZO:3,MAR:3,ABRIL:4,ABR:4,MAYO:5,MAY:5,JUNIO:6,JUN:6,JULIO:7,JUL:7,AGOSTO:8,AGO:8,SETIEMBRE:9,SEPTIEMBRE:9,SET:9,SEP:9,OCTUBRE:10,OCT:10,NOVIEMBRE:11,NOV:11,DICIEMBRE:12,DIC:12},
+  key(label, order){
+    const n = Clean.norm(label);
+    const ym = n.match(/\b(19|20)\d{2}\b/); const year = ym ? +ym[0] : 0;
+    let m = 0;
+    for(const w of n.split(' ')){ if(Months.map[w]){ m = Months.map[w]; break; } }
+    if(!m){ const rest = n.replace(/\b(19|20)\d{2}\b/,' ').match(/\b(\d{1,2})\b/); if(rest && +rest[1]>=1 && +rest[1]<=12) m = +rest[1]; }
+    return m ? year*100 + m : 1e7 + order;
+  },
+  order(labels){ return labels.map((l,i)=>({l,k:Months.key(l,i)})).sort((a,b)=>a.k-b.k).map(o=>o.l); }
+};
+
+/* =====================================================================
+   6. ESTADO
+   ===================================================================== */
+const State = {
+  data: [], months: [], pending: new Map(),
+  filters: { SERVICIO:new Set(), DISTRITO:new Set(), ASESOR:new Set(), PLAN:new Set(), ORIGEN:new Set(), MES:'', q:'' },
+  base: 'liq', page: 0,
+  clearFilters(){ FILTER_COLS.forEach(c=>this.filters[c].clear()); this.filters.MES=''; this.filters.q=''; },
+  passes(r, skipMonth){
+    for(const c of FILTER_COLS){ const s=this.filters[c]; if(s.size && !s.has(r[c])) return false; }
+    if(!skipMonth && this.filters.MES && r.MES !== this.filters.MES) return false;
+    if(this.filters.q && !r._q.includes(this.filters.q)) return false;
+    return true;
+  },
+  filtered(){ return this.data.filter(r=>this.passes(r,false)); },
+  inBase(r){ return this.base==='all' || r._liq; }
+};
+
+/* =====================================================================
+   7. HISTORIAL PERSISTENTE (db del artefacto)
+   ===================================================================== */
+const Store = {
+  db:true, KEY:'fiber-centro-tablero-v1', state:null, cache:new Map(), metas:new Map(), busy:false,
+  status(t){ $('histStatus').textContent = t; $('histStatus').hidden = !t; },
+  embedded(){ try{ return JSON.parse($('datos-tablero').textContent || '{}'); }catch{ return {}; } },
+  local(){ try{ return JSON.parse(localStorage.getItem(Store.KEY) || 'null'); }catch{ return null; } },
+  persist(){ try{ localStorage.setItem(Store.KEY, JSON.stringify(Store.state)); return true; }catch{ return false; } },
+  init(){
+    const e = Store.embedded(), l = Store.local();
+    const useLocal = l && l.meses && (l.generado||'') > (e.generado||'');
+    Store.state = useLocal ? l : (e.meses ? e : {generado:'',meses:{}});
+    Export.dirty = !!useLocal && (l.generado !== l.exportado);
+    if(!Object.keys(Store.state.meses).length) Access.admin = true;
+    $('genInfo').textContent = e.generado ? `Fiber Centro · Datos del archivo actualizados el ${Fmt.date(e.generado)}` : 'Fiber Centro · Tablero de ventas';
+    Access.apply(); Store.load();
+  },
+  load(){
+    Store.cache.clear(); Store.metas.clear();
+    for(const [slug,m] of Object.entries(Store.state.meses||{})){
+      const recs = (m.filas||[]).map(line=>{ const r = Data.fromArray(line.split('\t')); r.MES = m.label; return r; });
+      Store.cache.set(slug,{guardado:m.guardado,label:m.label,records:recs});
+      Store.metas.set(slug,{label:m.label,filas:recs.length,guardado:m.guardado,ingresos:recs.filter(r=>r._liq).reduce((a,r)=>a+r._pago,0)});
+    }
+    Store.status(Store.metas.size ? '' : 'Aún no hay meses. Pega tus datos de Excel y pulsa "Procesar Datos de Excel".');
+    App.rebuild(); Export.ui();
+  },
+  touch(){ Store.state.generado = new Date().toISOString(); Export.dirty = true; return Store.persist(); },
+  save(){
+    if(!State.pending.size) return;
+    const names = [...State.pending.values()].map(v=>v.label).join(', ');
+    for(const [slug,{label,records}] of State.pending)
+      Store.state.meses[slug] = {label, guardado:new Date().toISOString(), filas:records.map(r=>r._raw.join('\t'))};
+    const ok = Store.touch(); State.pending.clear();
+    App.message(ok?'ok':'warn', App.notes + `<br><strong>Agregado al tablero:</strong> ${esc(names)}. ` +
+      (ok ? 'Quedó guardado en este navegador. Pulsa <strong>Descargar tablero actualizado</strong> para compartirlo con el equipo.'
+          : 'Este navegador no permite guardar localmente: descarga el tablero actualizado ahora para no perder los datos.'));
+    Store.load();
+  },
+  remove(slug){ delete Store.state.meses[slug]; Store.touch(); Store.load(); },
+  importFile(file){
+    if(!file) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      try{
+        const doc = new DOMParser().parseFromString(String(fr.result), 'text/html');
+        const node = doc.getElementById('datos-tablero');
+        const st = node ? JSON.parse(node.textContent || '{}') : null;
+        const meses = st && st.meses && typeof st.meses === 'object' ? Object.entries(st.meses) : [];
+        if(!meses.length) throw new Error('Ese archivo no contiene meses de un tablero de Fiber Centro.');
+        const names = [];
+        meses.forEach(([slug,m])=>{ if(m && Array.isArray(m.filas)){ Store.state.meses[slug] = m; names.push(m.label); } });
+        Store.touch(); Store.load();
+        App.message('ok', `<strong>Se copiaron ${names.length} mes(es) del archivo:</strong> ${esc(Months.order(names).join(', '))}. Los meses con el mismo nombre se reemplazaron.`);
+      }catch(e){ App.message('err', esc(e.message || 'No se pudo leer el archivo.')); }
+      $('importFile').value = '';
+    };
+    fr.onerror = () => App.message('err','No se pudo leer el archivo seleccionado.');
+    fr.readAsText(file);
+  }
+};
+
+/* =====================================================================
+   7a. ARCHIVO DESCARGABLE (datos incluidos dentro del HTML)
+   ===================================================================== */
+const Export = {
+  dirty:false,
+  build(state){
+    const doc = new DOMParser().parseFromString(TEMPLATE, 'text/html');
+    doc.querySelectorAll('style:not([data-app])').forEach(el=>el.remove()); // estilos generados en tiempo de ejecución
+    doc.getElementById('datos-tablero').textContent = JSON.stringify(state).replace(/</g,'\\u003c');
+    return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+  },
+  download(state, filename){
+    const html = Export.build(state);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+    a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  },
+  stamp(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; },
+  all(){
+    if(!Object.keys(Store.state.meses).length) return;
+    Store.state.exportado = Store.state.generado; Store.persist();
+    Export.download(Store.state, `tablero-fiber-centro-${Export.stamp()}.html`);
+    Export.dirty = false; Export.ui();
+  },
+  asesor(name){ // archivo solo con las ventas de un asesor
+    const meses = {};
+    for(const [slug,m] of Object.entries(Store.state.meses)){
+      const filas = m.filas.filter(line => (line.split('\t')[COLUMNS.indexOf('ASESOR')]||'').trim() === name);
+      if(filas.length) meses[slug] = {...m, filas};
+    }
+    Export.download({generado:Store.state.generado || new Date().toISOString(), asesor:name, meses}, `ventas-${Hash.slug(name)}-${Export.stamp()}.html`);
+  },
+  ui(){
+    const has = Object.keys(Store.state?.meses||{}).length > 0;
+    $('btnExport').disabled = !has;
+    $('exportNote').textContent = !has ? 'Carga al menos un mes para generar el archivo.'
+      : Export.dirty ? 'Tienes cambios que aún no están en el archivo compartido. Descárgalo y reemplaza el anterior.'
+      : 'El archivo descargado ya incluye todos los meses de este tablero.';
+    $('exportNote').style.color = Export.dirty && has ? 'var(--orange)' : '';
+  }
+};
+
+/* =====================================================================
+   7b. ACCESO (quién carga datos) Y ENLACES POR ASESOR
+   ===================================================================== */
+const Access = {
+  admin:false,
+  get canEdit(){ return Access.admin; },
+  apply(){
+    $('loadPanel').hidden = !Access.admin;
+    const emb = Store.state?.asesor;
+    const b = $('modeBadge'); b.hidden = false;
+    b.textContent = Access.admin ? 'Administración de datos' : (emb ? `Ventas de ${emb}` : 'Modo consulta');
+    $('btnAdmin').textContent = Access.admin ? 'Cerrar administración' : 'Administrar datos';
+    UI.history(); Hash.sync?.();
+  }
+};
+const Hash = {
+  slug: s => Clean.norm(s).toLowerCase().replace(/ /g,'-'),
+  wanted: null,
+  read(){ const h = decodeURIComponent(location.hash.slice(1)); Hash.wanted = h.startsWith('asesor-') ? h.slice(7) : null; },
+  apply(){ // aplica #asesor-nombre cuando ya hay datos
+    if(!Hash.wanted || !State.data.length) return;
+    const name = [...new Set(State.data.map(r=>r.ASESOR))].find(a=>Hash.slug(a)===Hash.wanted);
+    if(name){ State.clearFilters(); State.filters.ASESOR.add(name); }
+    Hash.wanted = null;
+  },
+  sync(){ // refleja en el enlace la vista de un solo asesor
+    const s = State.filters.ASESOR, box = $('asesorLink');
+    if(s.size===1){
+      const name=[...s][0], h='asesor-'+Hash.slug(name);
+      if(location.hash.slice(1)!==h){ try{ history.replaceState(null,'','#'+h); }catch{ location.hash=h; } }
+      box.hidden=!Access.admin;
+      box.innerHTML = `Vista de <strong>${esc(name)}</strong>. <button type="button" class="btn-link" id="btnAsesorFile">Descargar archivo solo con sus ventas</button>`;
+      $('btnAsesorFile').addEventListener('click',()=>Export.asesor(name));
+    } else {
+      box.hidden=true;
+      if(location.hash.startsWith('#asesor-')){ try{ history.replaceState(null,'',location.pathname+location.search); }catch{} }
+    }
+  }
+};
+
+/* =====================================================================
+   8. FORMATO Y UTILIDADES
+   ===================================================================== */
+const Fmt = {
+  money(n){ return (n<0?'-':'') + 'S/. ' + Math.abs(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2}); },
+  int(n){ return Math.round(n||0).toLocaleString('es-PE'); },
+  pct(n,d=1){ return (n||0).toLocaleString('es-PE',{minimumFractionDigits:d,maximumFractionDigits:d}) + '%'; },
+  sPct(n){ return (n>0?'+':'') + Fmt.pct(n); },
+  date(iso){ try{ return new Date(iso).toLocaleString('es-PE',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }catch{ return ''; } }
+};
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const countBy = (rows, key, val = () => 1) => { const m=new Map(); rows.forEach(r=>m.set(r[key],(m.get(r[key])||0)+val(r))); return m; };
+
+/* =====================================================================
+   9. MÉTRICAS
+   ===================================================================== */
+const Metrics = {
+  of(rows){
+    const base = rows.filter(r=>State.inBase(r));
+    const ingresos = base.reduce((a,r)=>a+r._pago,0);
+    const liq = rows.filter(r=>r._liq).length;
+    const rep = rows.filter(r=>r._rep).length;
+    const days = rows.filter(r=>r._days!==null).map(r=>r._days);
+    const dnis = new Set(rows.map(r=>r.DNI).filter(Boolean));
+    return { ingresos, contratos: base.length, ordenes: rows.length, liq, tasa: rows.length? liq/rows.length*100 : null,
+      ticket: base.length ? ingresos/base.length : 0, rep, repPct: rows.length ? rep/rows.length*100 : 0,
+      dias: days.length ? days.reduce((a,b)=>a+b,0)/days.length : null, clientes: dnis.size };
+  },
+  byMonth(){ // respeta segmentadores salvo el mes
+    const rows = State.data.filter(r=>State.passes(r,true));
+    const g = new Map(State.months.map(m=>[m,[]]));
+    rows.forEach(r=>g.get(r.MES)?.push(r));
+    return g;
+  }
+};
+
+/* =====================================================================
+   10. SEGMENTADORES
+   ===================================================================== */
+const Filters = {
+  build(){
+    FILTER_COLS.forEach(col=>{
+      const box = $('f-'+col); box.innerHTML='';
+      const counts = countBy(State.data, col);
+      for(const v of [...State.filters[col]]) if(!counts.has(v)) State.filters[col].delete(v);
+      const values = [...counts.keys()].sort((a,b)=>a.localeCompare(b,'es',{numeric:true,sensitivity:'base'}));
+      box.appendChild(Filters.chip('Todos', State.data.length, true, ()=>{ State.filters[col].clear(); App.refresh(); }));
+      values.forEach(v=>{ const b = Filters.chip(v, counts.get(v), false, ()=>{ const s=State.filters[col]; s.has(v)?s.delete(v):s.add(v); App.refresh(); }); b.dataset.val=v; box.appendChild(b); });
+    });
+    const sel=$('mesSelect'); sel.innerHTML=''; sel.disabled=false;
+    sel.add(new Option('Todos los meses',''));
+    State.months.forEach(m=>sel.add(new Option(m,m)));
+    if(!State.months.includes(State.filters.MES)) State.filters.MES='';
+    $('dniSearch').disabled=false;
+  },
+  chip(label,count,isAll,onClick){
+    const b=document.createElement('button'); b.type='button'; b.className='chip'+(isAll?' chip-all':''); if(isAll) b.dataset.all='1';
+    const t=document.createElement('span'); t.className='t'; t.textContent=label;
+    const n=document.createElement('span'); n.className='n'; n.textContent=count;
+    b.append(t,n); b.title=label; b.addEventListener('click',onClick); return b;
+  },
+  sync(){
+    FILTER_COLS.forEach(col=>{
+      const s=State.filters[col];
+      $('f-'+col).querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed', (b.dataset.all ? s.size===0 : s.has(b.dataset.val)) ? 'true':'false'));
+    });
+    $('mesSelect').value = State.filters.MES;
+    const parts=[];
+    FILTER_COLS.forEach(c=>{ if(State.filters[c].size) parts.push(c.charAt(0)+c.slice(1).toLowerCase()+': '+[...State.filters[c]].join(', ')); });
+    if(State.filters.MES) parts.push('Mes: '+State.filters.MES);
+    if(State.filters.q) parts.push('Búsqueda: '+$('dniSearch').value.trim());
+    $('activeFilters').textContent = parts.length ? 'Filtrado por · '+parts.join(' · ') : 'Vista: todos los registros';
+    $('btnClearFilters').hidden = !parts.length;
+  }
+};
+
+/* =====================================================================
+   11. KPIs + FICHA DE CLIENTE
+   ===================================================================== */
+const KPIs = {
+  render(rows){
+    const m = Metrics.of(rows);
+    $('kIng').textContent = Fmt.money(m.ingresos);
+    $('kIngS').textContent = `Suma de PAGO DE PLAN · ${Fmt.int(m.contratos)} ${State.base==='liq'?'contratos liquidados':'órdenes'}`;
+    $('kLiq').textContent = Fmt.int(m.liq);
+    $('kLiqS').textContent = `de ${Fmt.int(m.ordenes)} órdenes registradas`;
+    $('kTic').textContent = Fmt.money(m.ticket);
+    $('kTasa').textContent = m.tasa===null ? '--%' : Fmt.pct(m.tasa);
+    $('kTasaS').textContent = `${Fmt.int(m.ordenes-m.liq)} órdenes sin liquidar`;
+    $('kRep').textContent = Fmt.int(m.rep);
+    $('kRepS').textContent = `${Fmt.pct(m.repPct)} de las órdenes`;
+    $('kDias').textContent = m.dias===null ? '--' : m.dias.toLocaleString('es-PE',{maximumFractionDigits:1}) + ' d';
+    $('kDiasS').textContent = m.dias===null ? 'Sin fechas de orden y liquidación legibles' : 'Promedio entre orden y liquidación';
+    $('kCli').textContent = Fmt.int(m.clientes);
+    KPIs.mom();
+  },
+  mom(){
+    const val=$('kMom'), pill=$('kMomP'), sub=$('kMomS');
+    const g = Metrics.byMonth(); const ing = new Map([...g].map(([k,rows])=>[k, Metrics.of(rows).ingresos]));
+    const ordered = State.months.filter(m=>g.get(m).length);
+    let cur, prev;
+    if(State.filters.MES){ const i = State.months.indexOf(State.filters.MES); cur = State.filters.MES; prev = i>0 ? State.months[i-1] : null; }
+    else { cur = ordered.at(-1); prev = ordered.at(-2); }
+    pill.hidden = true;
+    if(!cur || !prev){ val.textContent='--%'; sub.textContent = State.data.length ? 'Se necesitan al menos dos meses para comparar' : 'Ingresos vs. mes anterior'; return; }
+    const a = ing.get(cur)||0, b = ing.get(prev)||0;
+    if(!b){ val.textContent='--%'; sub.textContent=`${cur} vs. ${prev}: sin ingresos en el mes base`; return; }
+    const gr = (a-b)/b*100;
+    val.textContent = Fmt.sPct(gr);
+    pill.hidden=false; pill.className = 'pill ' + (gr>0.05?'pill-up':gr<-0.05?'pill-down':'pill-flat');
+    pill.textContent = (gr>0.05?'▲ ':gr<-0.05?'▼ ':'= ') + Fmt.money(a-b);
+    sub.textContent = `${cur} vs. ${prev}`;
+  },
+  client(rows){
+    const card = $('clientCard');
+    const dnis = [...new Set(rows.map(r=>r.DNI).filter(Boolean))];
+    if(!State.filters.q || dnis.length !== 1){ card.hidden = true; return; }
+    const all = State.data.filter(r=>r.DNI===dnis[0]);
+    const name = all.find(r=>r['NOMBRE Y APELLIDOS DEL CLIENTE'])?.['NOMBRE Y APELLIDOS DEL CLIENTE'] || 'Cliente sin nombre';
+    const liq = all.filter(r=>r._liq);
+    const uniq = k => [...new Set(all.map(r=>r[k]).filter(v=>v && v!==BLANK))].join(', ') || '—';
+    const meses = Months.order([...new Set(all.map(r=>r.MES))]).join(', ');
+    card.hidden = false;
+    card.innerHTML = `
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="minw0"><div class="label">Ficha de cliente</div>
+          <div class="display text-xl font-bold mt-1">${esc(name)}</div>
+          <div class="mono text-sm muted">DNI ${esc(dnis[0])}</div></div>
+        <span class="pill ${liq.length?'pill-up':'pill-warn'}">${liq.length?'Con contrato liquidado':'Sin liquidar'}</span>
+      </div>
+      <dl class="grid gap-3 grid-cols-2 md:grid-cols-4 mt-4 text-sm">
+        <div><dt class="label">Órdenes</dt><dd class="mono mt-1">${all.length} · ${liq.length} liquidadas</dd></div>
+        <div><dt class="label">Pagado (liquidado)</dt><dd class="mono mt-1">${Fmt.money(liq.reduce((a,r)=>a+r._pago,0))}</dd></div>
+        <div><dt class="label">Servicios</dt><dd class="mt-1">${esc(uniq('SERVICIO'))}</dd></div>
+        <div><dt class="label">Planes</dt><dd class="mt-1">${esc(uniq('PLAN'))}</dd></div>
+        <div><dt class="label">Distrito</dt><dd class="mt-1">${esc(uniq('DISTRITO'))}</dd></div>
+        <div><dt class="label">Asesor</dt><dd class="mt-1">${esc(uniq('ASESOR'))}</dd></div>
+        <div><dt class="label">Reprogramaciones</dt><dd class="mono mt-1">${all.filter(r=>r._rep).length}</dd></div>
+        <div><dt class="label">Meses</dt><dd class="mt-1">${esc(meses)}</dd></div>
+      </dl>`;
+  }
+};
+
+/* =====================================================================
+   12. MAPA DE CALOR DE DISTRITOS
+   ===================================================================== */
+const Heat = {
+  mix(a,b,t){ const p=h=>{h=h.replace('#','');if(h.length===3)h=[...h].map(x=>x+x).join('');return [0,2,4].map(i=>parseInt(h.substr(i,2),16));};
+    const A=p(a),B=p(b); return 'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'; },
+  color(t){ const o=css('--p5'),am=css('--amber'),g=css('--green'); return t<0.5 ? Heat.mix(o,am,t/0.5) : Heat.mix(am,g,(t-0.5)/0.5); },
+  render(rows){
+    const list=$('heatList'); list.innerHTML='';
+    const agg=new Map();
+    rows.filter(r=>State.inBase(r)).forEach(r=>{ const o=agg.get(r.DISTRITO)||{s:0,n:0}; o.s+=r._pago; o.n++; agg.set(r.DISTRITO,o); });
+    const items=[...agg.entries()].sort((a,b)=>b[1].s-a[1].s);
+    if(!items.length){ list.innerHTML='<p class="muted text-sm">Sin registros para la selección actual.</p>'; return; }
+    const max=items[0][1].s||1, total=items.reduce((a,[,o])=>a+o.s,0)||1;
+    items.forEach(([d,o],i)=>{
+      const t = items.length===1 ? 1 : Math.max(0,o.s)/max;
+      const row=document.createElement('div'); row.className='heat-row';
+      row.innerHTML = `<div class="text-sm font-medium minw0"><span class="mono muted text-xs" style="display:inline-block;width:2.2em">${i+1}</span>${esc(d)}</div>
+        <div class="mono text-sm text-right whitespace-nowrap">${Fmt.money(o.s)} <span class="muted text-xs">· ${o.n} ctr · ${(o.s/total*100).toFixed(1)}%</span></div>
+        <div class="heat-track"><div class="heat-fill" style="width:${Math.max(2,t*100)}%;background:linear-gradient(90deg, ${Heat.color(Math.max(0,t-0.35))}, ${Heat.color(t)})"></div></div>`;
+      list.appendChild(row);
+    });
+  }
+};
+
+/* =====================================================================
+   13. GRÁFICOS
+   ===================================================================== */
+const Charts = {
+  inst:{},
+  pal(){ return ['--p1','--p2','--p3','--p4','--p5','--p6','--p7','--p8','--p9','--p10'].map(css); },
+  pick(i){ const p=Charts.pal(); return p[i%p.length]; },
+  make(id,cfg){ Charts.inst[id]?.destroy(); Charts.inst[id] = new Chart($(id), cfg); },
+  destroyAll(){ Object.values(Charts.inst).forEach(c=>c.destroy()); Charts.inst={}; },
+  defaults(){ Chart.defaults.font.family = getComputedStyle(document.body).fontFamily; Chart.defaults.color = css('--muted'); Chart.defaults.borderColor = css('--line'); },
+  grid(){ return {color:css('--line')}; },
+  moneyTick(v){ return 'S/. ' + Number(v).toLocaleString('es-PE',{notation: Math.abs(v)>=10000?'compact':'standard', maximumFractionDigits:1}); },
+
+  trend(){
+    const g = Metrics.byMonth(), labels = State.months;
+    const ms = labels.map(m=>Metrics.of(g.get(m)));
+    const sel = State.filters.MES, green=css('--p1');
+    Charts.make('trendChart',{
+      data:{labels,datasets:[
+        {type:'bar',label:'Ingresos',data:ms.map(m=>m.ingresos),yAxisID:'y',borderRadius:4,maxBarThickness:48,
+          backgroundColor:labels.map(l=>!sel||l===sel?green:green+'55')},
+        {type:'line',label:'Contratos liquidados',data:ms.map(m=>m.liq),yAxisID:'y1',borderColor:css('--p2'),backgroundColor:css('--p2'),tension:.3,pointRadius:labels.map((_,i)=>i===labels.length-1?5:3),borderWidth:2}
+      ]},
+      options:{maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
+        plugins:{legend:{position:'bottom',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y'?` Ingresos: ${Fmt.money(c.parsed.y)}`:` Liquidados: ${c.parsed.y}`}}},
+        scales:{y:{beginAtZero:true,grid:Charts.grid(),ticks:{callback:Charts.moneyTick}},
+                y1:{beginAtZero:true,position:'right',grid:{display:false},ticks:{precision:0}},
+                x:{grid:{display:false},ticks:{color:css('--fg')}}}}
+    });
+  },
+
+  asesores(rows){
+    const liq=countBy(rows.filter(r=>r._liq),'ASESOR'), pend=countBy(rows.filter(r=>!r._liq),'ASESOR');
+    const names=[...new Set([...liq.keys(),...pend.keys()])].sort((a,b)=>(liq.get(b)||0)-(liq.get(a)||0) || (pend.get(b)||0)-(pend.get(a)||0));
+    $('asesWrap').style.height = Math.max(200, names.length*30+60)+'px';
+    Charts.make('asesChart',{type:'bar',
+      data:{labels:names,datasets:[
+        {label:'Liquidados',data:names.map(n=>liq.get(n)||0),backgroundColor:css('--green'),borderRadius:3,barPercentage:.75},
+        {label:'Pendientes',data:names.map(n=>pend.get(n)||0),backgroundColor:css('--p2'),borderRadius:3,barPercentage:.75}]},
+      options:{indexAxis:'y',maintainAspectRatio:false,animation:{duration:300},
+        plugins:{legend:{position:'bottom',labels:{boxWidth:12}},tooltip:{callbacks:{afterBody:it=>{const n=names[it[0].dataIndex];const l=liq.get(n)||0,p=pend.get(n)||0;return `Efectividad: ${l+p?Fmt.pct(l/(l+p)*100):'--'}`;}}}},
+        scales:{x:{stacked:true,beginAtZero:true,ticks:{precision:0},grid:Charts.grid()},y:{stacked:true,grid:{display:false},ticks:{color:css('--fg'),autoSkip:false}}}}
+    });
+  },
+
+  planes(rows){
+    const base=rows.filter(r=>State.inBase(r));
+    const agg=new Map(); base.forEach(r=>{const o=agg.get(r.PLAN)||{n:0,s:0}; o.n++; o.s+=r._pago; agg.set(r.PLAN,o);});
+    let items=[...agg.entries()];
+    const speed = l => { const m=Clean.norm(l).match(/(\d+(?:\s\d+)?)\s*(MB|MBPS|GB|GBPS|M\b|G\b)?/); if(!m) return null; let n=parseFloat(m[1].replace(' ','.')); if(m[2]&&m[2].startsWith('G')) n*=1000; return n; };
+    const allSpeed = items.length && items.every(([l])=>speed(l)!==null);
+    items.sort(allSpeed ? (a,b)=>speed(a[0])-speed(b[0]) : (a,b)=>b[1].n-a[1].n);
+    $('planSub').textContent = (State.base==='liq'?'Contratos liquidados':'Órdenes') + (allSpeed?' por plan, ordenados por velocidad.':' por plan, de mayor a menor volumen.');
+    const maxN=Math.max(1,...items.map(i=>i[1].n));
+    Charts.make('planChart',{type:'bar',
+      data:{labels:items.map(i=>i[0]),datasets:[{label:'Ventas',data:items.map(i=>i[1].n),backgroundColor:items.map((_,i)=>Charts.pick(i)),borderRadius:{topLeft:4,topRight:4},maxBarThickness:56}]},
+      options:{maintainAspectRatio:false,animation:{duration:300},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const o=items[c.dataIndex][1];return [` ${o.n} ventas`,` ${Fmt.money(o.s)} en PAGO DE PLAN`];}}}},
+        scales:{y:{beginAtZero:true,ticks:{precision:0},grid:Charts.grid()},x:{grid:{display:false},ticks:{color:css('--fg'),maxRotation:45,autoSkip:false}}}}
+    });
+  },
+
+  tipoColor(t){ return ({'Solo internet':css('--p1'),'Internet + TV':css('--p2'),'TV / Cable':css('--p4')})[t] || css('--p6'); },
+  minis:[],
+  distritos(rows){
+    const inst = rows.filter(r=>r._liq);
+    const byD = countBy(inst,'DISTRITO');
+    const items = [...byD].sort((a,b)=>b[1]-a[1]);
+    const total = inst.length || 1;
+    // círculo principal: 10 distritos con más instalaciones + "Otros"
+    const top = items.slice(0,10), rest = items.slice(10).reduce((a,[,n])=>a+n,0);
+    const labels = top.map(i=>i[0]).concat(rest?['Otros distritos']:[]);
+    const data = top.map(i=>i[1]).concat(rest?[rest]:[]);
+    const max = Math.max(1,...data);
+    Charts.make('dpieChart',{type:'doughnut',
+      data:{labels,datasets:[{data,backgroundColor:data.map((n,i)=>labels[i]==='Otros distritos'?css('--gray'):Charts.pick(i)),borderColor:css('--surface'),borderWidth:2}]},
+      options:{maintainAspectRatio:false,cutout:'55%',animation:{duration:300},
+        plugins:{legend:{position:'right',labels:{boxWidth:10,color:css('--fg'),font:{size:11}}},
+          title:{display:!inst.length,text:'Sin instalaciones liquidadas en la selección',color:css('--muted')},
+          tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} instalaciones (${Fmt.pct(c.parsed/total*100)})`}}}}
+    });
+    // leyenda de tipos
+    const tipos = [...countBy(inst,'_tipo')].sort((a,b)=>b[1]-a[1]).map(t=>t[0]);
+    $('tipoLegend').innerHTML = tipos.map(t=>`<span><span class="sw" style="background:${Charts.tipoColor(t)}"></span>${esc(t)}</span>`).join('');
+    // un círculo por distrito
+    Charts.minis.forEach(c=>c.destroy()); Charts.minis=[];
+    const grid = $('dpieGrid'); grid.innerHTML='';
+    if(!items.length){ grid.innerHTML='<p class="muted text-sm">Sin instalaciones para la selección actual.</p>'; return; }
+    items.slice(0,40).forEach(([d,n])=>{
+      const rs = inst.filter(r=>r.DISTRITO===d); const tm = countBy(rs,'_tipo'); const ts = tipos.filter(t=>tm.get(t));
+      const card = document.createElement('button'); card.type='button'; card.className='mini';
+      card.setAttribute('aria-pressed', State.filters.DISTRITO.has(d)?'true':'false');
+      card.title = `Filtrar por ${d}`;
+      card.innerHTML = `<div class="mini-c"><canvas></canvas><div class="mini-n">${n}</div></div>
+        <div class="mini-t">${esc(d)}</div>
+        <div class="text-[11px] muted mono">${(n/total*100).toFixed(1)}% del total</div>`;
+      card.addEventListener('click',()=>{ const s=State.filters.DISTRITO; s.has(d)?s.delete(d):s.add(d); App.refresh(); });
+      grid.appendChild(card);
+      Charts.minis.push(new Chart(card.querySelector('canvas'),{type:'doughnut',
+        data:{labels:ts,datasets:[{data:ts.map(t=>tm.get(t)),backgroundColor:ts.map(Charts.tipoColor),borderColor:css('--surface'),borderWidth:1.5}]},
+        options:{maintainAspectRatio:false,cutout:'68%',animation:false,plugins:{legend:{display:false},
+          tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} (${Fmt.pct(c.parsed/n*100,0)})`}}}}}));
+    });
+    if(items.length>40) grid.insertAdjacentHTML('beforeend',`<p class="muted text-xs col-span-full">Se muestran los 40 distritos con más instalaciones de ${items.length}.</p>`);
+  },
+
+  servicios(rows){
+    const m=countBy(rows.filter(r=>State.inBase(r)),'SERVICIO'); const items=[...m].sort((a,b)=>b[1]-a[1]);
+    const total=items.reduce((a,[,n])=>a+n,0)||1, pal=Charts.pal();
+    Charts.make('servChart',{type:'doughnut',
+      data:{labels:items.map(i=>i[0]),datasets:[{data:items.map(i=>i[1]),backgroundColor:items.map((_,i)=>pal[i%pal.length]),borderColor:css('--surface'),borderWidth:2}]},
+      options:{maintainAspectRatio:false,cutout:'62%',animation:{duration:300},
+        plugins:{legend:{position:'bottom',labels:{boxWidth:12,color:css('--fg')}},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} (${Fmt.pct(c.parsed/total*100)})`}}}}
+    });
+  },
+
+  origen(rows){
+    const base=rows.filter(r=>State.inBase(r)); const n=countBy(base,'ORIGEN'), s=countBy(base,'ORIGEN',r=>r._pago);
+    const items=[...n].sort((a,b)=>b[1]-a[1]);
+    $('origWrap').style.height = Math.max(220, items.length*30+50)+'px';
+    Charts.make('origChart',{type:'bar',
+      data:{labels:items.map(i=>i[0]),datasets:[{label:'Ventas',data:items.map(i=>i[1]),backgroundColor:items.map((_,i)=>Charts.pick(i)),borderRadius:3,barPercentage:.7}]},
+      options:{indexAxis:'y',maintainAspectRatio:false,animation:{duration:300},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>[` ${c.parsed.x} ventas`,` ${Fmt.money(s.get(c.label)||0)}`]}}},
+        scales:{x:{beginAtZero:true,ticks:{precision:0},grid:Charts.grid()},y:{grid:{display:false},ticks:{color:css('--fg'),autoSkip:false}}}}
+    });
+  },
+
+  tiempos(rows){
+    const B=[['Mismo día',0,0],['1–2 días',1,2],['3–5 días',3,5],['6–10 días',6,10],['11–20 días',11,20],['21+ días',21,1e9]];
+    const d=rows.filter(r=>r._days!==null).map(r=>r._days);
+    const counts=B.map(([,a,b])=>d.filter(x=>x>=a&&x<=b).length);
+    const cols=B.map((_,i)=>Heat.color(1-i/(B.length-1)));
+    Charts.make('timeChart',{type:'bar',
+      data:{labels:B.map(b=>b[0]),datasets:[{label:'Contratos',data:counts,backgroundColor:cols,borderRadius:{topLeft:4,topRight:4}}]},
+      options:{maintainAspectRatio:false,animation:{duration:300},
+        plugins:{legend:{display:false},title:{display:!d.length,text:'Sin fechas legibles para calcular',color:css('--muted')},
+          tooltip:{callbacks:{label:c=>` ${c.parsed.y} contratos (${d.length?Fmt.pct(c.parsed.y/d.length*100):'--'})`}}},
+        scales:{y:{beginAtZero:true,ticks:{precision:0},grid:Charts.grid()},x:{grid:{display:false},ticks:{color:css('--fg')}}}}
+    });
+  },
+
+  comparativo(rowsA, rowsB, la, lb){
+    const dim=$('cmpDim').value, metric=$('cmpMetric').value;
+    const f = metric==='ing' ? (rs=>countBy(rs.filter(r=>State.inBase(r)),dim,r=>r._pago)) : (rs=>countBy(rs.filter(r=>State.inBase(r)),dim));
+    const A=f(rowsA), B=f(rowsB);
+    const keys=[...new Set([...A.keys(),...B.keys()])].sort((x,y)=>((B.get(y)||0)+(A.get(y)||0))-((B.get(x)||0)+(A.get(x)||0))).slice(0,15);
+    $('cmpWrap').style.height = Math.max(240, keys.length*34+70)+'px';
+    Charts.make('cmpChart',{type:'bar',
+      data:{labels:keys,datasets:[
+        {label:la,data:keys.map(k=>A.get(k)||0),backgroundColor:css('--p1'),borderRadius:3,barPercentage:.8,categoryPercentage:.75},
+        {label:lb,data:keys.map(k=>B.get(k)||0),backgroundColor:css('--p2'),borderRadius:3,barPercentage:.8,categoryPercentage:.75}]},
+      options:{indexAxis:'y',maintainAspectRatio:false,animation:{duration:300},
+        plugins:{legend:{position:'bottom',labels:{boxWidth:12}},tooltip:{callbacks:{
+          label:c=>` ${c.dataset.label}: ${metric==='ing'?Fmt.money(c.parsed.x):c.parsed.x}`,
+          afterBody:it=>{const k=keys[it[0].dataIndex];const a=A.get(k)||0,b=B.get(k)||0;return a?`Variación: ${Fmt.sPct((b-a)/a*100)}`:'Variación: nuevo';}}}},
+        scales:{x:{beginAtZero:true,grid:Charts.grid(),ticks:metric==='ing'?{callback:Charts.moneyTick}:{precision:0}},y:{grid:{display:false},ticks:{color:css('--fg'),autoSkip:false}}}}
+    });
+  }
+};
+
+/* =====================================================================
+   14. COMPARATIVO ENTRE MESES
+   ===================================================================== */
+const Compare = {
+  fillSelects(){
+    const a=$('cmpA'), b=$('cmpB'), keepA=a.value, keepB=b.value, ms=State.months;
+    [a,b].forEach(s=>{ s.innerHTML=''; ms.forEach(m=>s.add(new Option(m,m))); s.disabled = ms.length<2; });
+    a.value = ms.includes(keepA) ? keepA : (ms.at(-2) ?? '');
+    b.value = ms.includes(keepB) ? keepB : (ms.at(-1) ?? '');
+  },
+  render(){
+    const ok = State.months.length >= 2;
+    $('cmpEmpty').hidden = ok; $('cmpBody').hidden = !ok;
+    if(!ok){ $('cmpEmpty').querySelector('span:nth-child(2)').textContent = State.data.length ? 'Solo hay un mes cargado.' : 'Esperando carga de datos de Excel...'; return; }
+    const la=$('cmpA').value, lb=$('cmpB').value, g=Metrics.byMonth();
+    const A=Metrics.of(g.get(la)||[]), B=Metrics.of(g.get(lb)||[]);
+    const rows = [
+      ['Ingresos', 'ingresos', Fmt.money, 'rel'],
+      ['Contratos liquidados', 'liq', Fmt.int, 'rel'],
+      ['Órdenes', 'ordenes', Fmt.int, 'rel'],
+      ['Tasa de liquidación', 'tasa', v=>v===null?'--':Fmt.pct(v), 'pp'],
+      ['Ticket promedio', 'ticket', Fmt.money, 'rel'],
+      ['Reprogramaciones', 'rep', Fmt.int, 'rel', true],
+      ['Días a liquidar', 'dias', v=>v===null?'--':v.toFixed(1), 'abs', true],
+      ['Clientes únicos', 'clientes', Fmt.int, 'rel'],
+    ];
+    const pill = (d, inverse) => { if(d===null || !isFinite(d)) return 'pill-flat'; const good = inverse ? d<0 : d>0; const cls = Math.abs(d)<0.05 ? 'pill-flat' : good ? 'pill-up' : 'pill-down'; return cls; };
+    let html = `<thead><tr><th>Indicador</th><th class="num">${esc(la)}</th><th class="num">${esc(lb)}</th><th class="num">Variación</th></tr></thead><tbody>`;
+    rows.forEach(([name,k,fmt,mode,inv])=>{
+      const a=A[k], b=B[k]; let txt='--', d=null;
+      if(a!==null && b!==null){
+        if(mode==='rel'){ d = a ? (b-a)/a*100 : null; txt = d===null ? (b? 'nuevo':'--') : Fmt.sPct(d); }
+        else if(mode==='pp'){ d = b-a; txt = (d>0?'+':'') + d.toFixed(1) + ' pp'; }
+        else { d = b-a; txt = (d>0?'+':'') + d.toFixed(1) + ' d'; }
+      }
+      const cls = d===null ? 'pill-flat' : pill(d, inv);
+      html += `<tr><td>${name}</td><td class="num">${fmt(a)}</td><td class="num">${fmt(b)}</td><td class="num"><span class="pill ${cls}">${txt}</span></td></tr>`;
+    });
+    $('cmpTable').innerHTML = html + '</tbody>';
+    Charts.comparativo(g.get(la)||[], g.get(lb)||[], la, lb);
+  }
+};
+
+/* =====================================================================
+   15. TABLA DE DETALLE
+   ===================================================================== */
+const Detail = {
+  rows: [],
+  render(rows){
+    const order = new Map(State.months.map((m,i)=>[m,i]));
+    Detail.rows = rows.slice().sort((a,b)=>(order.get(b.MES)-order.get(a.MES)) || String(a.ORDEN).localeCompare(String(b.ORDEN),'es',{numeric:true}));
+    const pages = Math.max(1, Math.ceil(Detail.rows.length/PAGE));
+    State.page = Math.min(State.page, pages-1);
+    const slice = Detail.rows.slice(State.page*PAGE, State.page*PAGE+PAGE);
+    $('detSub').textContent = `${Fmt.int(Detail.rows.length)} registros con los filtros activos.`;
+    $('pgInfo').textContent = `${State.page+1} / ${pages}`;
+    $('pgPrev').disabled = State.page===0; $('pgNext').disabled = State.page>=pages-1;
+    let h = '<thead><tr><th>Mes</th><th>Orden</th><th>DNI</th><th>Cliente</th><th>Servicio</th><th>Plan</th><th>Distrito</th><th>Asesor</th><th>Origen</th><th class="num">Pago</th><th>Estado</th><th>Reprog.</th><th>F. orden</th><th>F. liquidación</th><th>Descripción</th></tr></thead><tbody>';
+    if(!slice.length) h += '<tr><td colspan="15" class="muted">Ningún registro coincide con los filtros.</td></tr>';
+    slice.forEach(r=>{
+      h += `<tr><td>${esc(r.MES)}</td><td class="mono">${esc(r.ORDEN)}</td>
+        <td class="mono"><button class="btn-link" data-dni="${esc(r.DNI)}" title="Ver ficha del cliente">${esc(r.DNI)||'—'}</button></td>
+        <td>${esc(r['NOMBRE Y APELLIDOS DEL CLIENTE'])}</td><td>${esc(r.SERVICIO)}</td><td>${esc(r.PLAN)}</td><td>${esc(r.DISTRITO)}</td><td>${esc(r.ASESOR)}</td><td>${esc(r.ORIGEN)}</td>
+        <td class="num">${Fmt.money(r._pago)}</td>
+        <td><span class="pill ${r._liq?'pill-up':'pill-warn'}">${r._liq?'Liquidado':'Pendiente'}</span></td>
+        <td>${r._rep?esc(r.REPROGRAMACION):'—'}</td><td class="mono">${esc(r['FECHA DE ORDEN'])}</td><td class="mono">${esc(r['FECHA LIQUIDACION'])}</td>
+        <td class="wrap-cell">${esc(r.DESCRIPCION)}</td></tr>`;
+    });
+    $('detTable').innerHTML = h + '</tbody>';
+  }
+};
+
+/* =====================================================================
+   16. INTERFAZ: historial y pendientes
+   ===================================================================== */
+const UI = {
+  confirming: null,
+  history(){
+    const list=$('histList'); list.innerHTML='';
+    const metas=[...Store.metas.entries()];
+    const ordered = Months.order(metas.map(([,m])=>m.label));
+    $('histCount').textContent = metas.length ? `${metas.length} mes(es)` : '';
+    ordered.forEach(label=>{
+      const [slug,m] = metas.find(([,x])=>x.label===label);
+      const el=document.createElement('div'); el.className='hist-item';
+      const conf = UI.confirming===slug;
+      el.innerHTML = `<div class="minw0"><div class="text-sm font-semibold">${esc(m.label)}</div>
+          <div class="text-[11px] muted mono">${Fmt.int(m.filas)} filas · ${Fmt.money(m.ingresos||0)} · ${esc(Fmt.date(m.guardado))}</div></div>
+        <div class="flex items-center gap-2">${!Access.canEdit ? '' : conf
+          ? `<span class="text-[11px] muted">¿Eliminar?</span><button class="btn-danger" data-act="yes">Sí</button><button class="btn-link" data-act="no">No</button>`
+          : `<button class="btn-link" data-act="rep" aria-label="Reemplazar los datos de ${esc(m.label)}">Reemplazar</button><button class="btn-danger" data-act="del" aria-label="Eliminar ${esc(m.label)} del tablero">Eliminar</button>`}</div>`;
+      el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        const a=b.dataset.act;
+        if(a==='rep'){ UI.startReplace(slug); return; }
+        if(a==='del') UI.confirming=slug; else if(a==='no') UI.confirming=null; else { UI.confirming=null; if(State.replaceTarget===slug) UI.cancelReplace(); Store.remove(slug); }
+        UI.history();
+      }));
+      list.appendChild(el);
+    });
+  },
+  startReplace(slug){
+    const m = Store.metas.get(slug); if(!m) return;
+    State.replaceTarget = slug;
+    const b = $('replaceBanner'); b.hidden = false;
+    b.innerHTML = `<strong>Reemplazando ${esc(m.label)}.</strong> Pega abajo los datos nuevos y pulsa el botón. Los ${Fmt.int(m.filas)} registros actuales de ${esc(m.label)} se borrarán y todas las filas pegadas quedarán como ${esc(m.label)}. <button type="button" class="btn-link" id="btnCancelRep">Cancelar</button>`;
+    $('btnCancelRep').addEventListener('click', UI.cancelReplace);
+    $('btnProcess').textContent = `Reemplazar datos de ${m.label}`;
+    $('loadPanel').scrollIntoView({behavior:'smooth', block:'start'}); $('excelInput').focus();
+  },
+  cancelReplace(){ State.replaceTarget = null; $('replaceBanner').hidden = true; $('btnProcess').textContent = 'Procesar Datos de Excel'; },
+  pending(){
+    const box=$('pendingBox'), list=$('pendingList');
+    box.hidden = !State.pending.size; list.innerHTML='';
+    $('btnSave').hidden = !Store.db;
+    State.pending.forEach(({label,records},slug)=>{
+      const exists = Store.metas.has(slug);
+      const d=document.createElement('div'); d.className='flex items-baseline justify-between gap-2 py-1';
+      d.innerHTML = `<span class="minw0">${esc(label)} <span class="tag-new">${exists?'reemplaza':'nuevo'}</span></span><span class="mono text-xs muted">${Fmt.int(records.length)} filas</span>`;
+      list.appendChild(d);
+    });
+  }
+};
+
+/* =====================================================================
+   17. CONTROLADOR
+   ===================================================================== */
+const PANELS = ['trend','heat','dpie','ases','plan','serv','orig','time','det'];
+const App = {
+  showPanels(on){
+    PANELS.forEach(p=>{ $(p+'Empty').hidden=on; const w=$(p+'Wrap')||$(p+'List'); if(w) w.hidden=!on; });
+  },
+  rebuild(){
+    const map = new Map();
+    for(const [k,v] of Store.cache) map.set(k,{label:v.label,records:v.records});
+    for(const [k,v] of State.pending) map.set(k,{label:v.label,records:v.records});
+    State.data = [...map.values()].flatMap(v=>v.records);
+    State.months = Months.order([...map.values()].map(v=>v.label));
+    UI.history(); UI.pending();
+    if(!State.data.length){ App.empty(); return; }
+    Hash.apply(); Filters.build(); Compare.fillSelects(); App.showPanels(true);
+    const liq = State.data.filter(r=>r._liq).length;
+    $('loadStatus').textContent = `${Fmt.int(State.data.length)} órdenes · ${State.months.length} meses · ${Fmt.int(liq)} liquidadas`;
+    App.refresh();
+  },
+  refresh(){
+    if(!State.data.length) return;
+    Filters.sync(); Hash.sync(); Charts.defaults();
+    const rows = State.filtered();
+    KPIs.render(rows); KPIs.client(rows); Heat.render(rows); Charts.distritos(rows);
+    Charts.trend(); Charts.asesores(rows); Charts.planes(rows); Charts.servicios(rows); Charts.origen(rows); Charts.tiempos(rows);
+    Compare.render(); Detail.render(rows);
+  },
+  empty(){
+    Charts.destroyAll(); Charts.minis.forEach(c=>c.destroy()); Charts.minis=[]; App.showPanels(false);
+    FILTER_COLS.forEach(c=>$('f-'+c).innerHTML='<span class="muted text-xs">Se generará al procesar los datos.</span>');
+    const sel=$('mesSelect'); sel.innerHTML='<option value="">Esperando carga de datos…</option>'; sel.disabled=true;
+    $('dniSearch').disabled=true; $('cmpA').innerHTML=''; $('cmpB').innerHTML=''; $('cmpA').disabled=$('cmpB').disabled=true;
+    $('cmpEmpty').hidden=false; $('cmpBody').hidden=true; $('clientCard').hidden=true;
+    $('kIng').textContent='S/. 0.00'; $('kLiq').textContent='0'; $('kMom').textContent='--%'; $('kMomP').hidden=true;
+    $('kTic').textContent='S/. 0.00'; $('kTasa').textContent='--%'; $('kRep').textContent='0'; $('kDias').textContent='--'; $('kCli').textContent='0';
+    $('kLiqS').textContent='de 0 órdenes registradas'; $('kMomS').textContent='Ingresos vs. mes anterior';
+    $('activeFilters').textContent='Vista: todos los registros'; $('btnClearFilters').hidden=true;
+    $('loadStatus').textContent='Sin datos cargados'; $('pgInfo').textContent='0 / 0';
+  },
+  message(kind, html){ const m=$('parseMsg'); m.hidden=false; m.className='msg '+({ok:'msg-ok',err:'msg-err',warn:'msg-warn'}[kind]); m.innerHTML=html; },
+  process(){
+    try{
+      const res = Parser.build($('excelInput').value);
+      let groups;
+      const target = State.replaceTarget && Store.metas.get(State.replaceTarget) ? State.replaceTarget : null;
+      if(target){ // todas las filas pegadas pasan al mes elegido
+        const label = Store.metas.get(target).label;
+        res.records.forEach(r=>{ r.MES = label; r._slug = target; });
+        groups = new Map([[target,{label,records:res.records}]]);
+      } else groups = Data.groupByMonth(res.records);
+      const changes = [];
+      groups.forEach((v,k)=>{ const known = Store.cache.get(k)?.label; if(known) v.records.forEach(r=>r.MES=known), v.label=known;
+        const old = Store.metas.get(k); if(old) changes.push(`${esc(v.label)}: se borraron ${Fmt.int(old.filas)} registros anteriores y se cargaron ${Fmt.int(v.records.length)} nuevos`);
+        State.pending.set(k,v); });
+      let notes = `<strong>${Fmt.int(res.records.length)} filas procesadas en ${groups.size} mes(es).</strong>`;
+      if(changes.length) notes += '<br>' + changes.join('<br>') + '.';
+      if(res.skipped) notes += ` Se ignoraron ${res.skipped} filas vacías.`;
+      if(res.badMoney) notes += ` ${res.badMoney} valores de PAGO DE PLAN no eran numéricos y se contaron como 0.`;
+      if(res.missing.length) notes += `<br>Columnas no encontradas: ${res.missing.join(', ')}.`;
+      App.notes = notes;
+      
+      App.message(res.missing.length?'warn':'ok', notes);
+      $('excelInput').value='';
+      UI.cancelReplace();
+      State.page=0; App.rebuild();
+      Store.save();
+    }catch(e){ App.message('err', esc(e.message)); }
+  },
+  setBase(b){ State.base=b; $('baseLiq').setAttribute('aria-pressed',b==='liq'); $('baseAll').setAttribute('aria-pressed',b==='all'); App.refresh(); },
+  init(){
+    $('btnProcess').addEventListener('click',App.process);
+    $('btnClearInput').addEventListener('click',()=>{ $('excelInput').value=''; $('parseMsg').hidden=true; });
+    $('excelInput').addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter') App.process(); });
+    $('btnSave').addEventListener('click',Store.save);
+    $('btnExport').addEventListener('click',Export.all);
+    $('importFile').addEventListener('change',e=>Store.importFile(e.target.files[0]));
+    $('btnAdmin').addEventListener('click',()=>{ Access.admin=!Access.admin; Access.apply(); if(Access.admin) $('loadPanel').scrollIntoView({behavior:'smooth'}); });
+    $('btnDiscard').addEventListener('click',()=>{ State.pending.clear(); $('parseMsg').hidden=true; App.rebuild(); });
+    $('mesSelect').addEventListener('change',e=>{ State.filters.MES=e.target.value; State.page=0; App.refresh(); });
+    let t; $('dniSearch').addEventListener('input',e=>{ clearTimeout(t); t=setTimeout(()=>{ State.filters.q=Clean.norm(e.target.value); State.page=0; App.refresh(); },220); });
+    $('btnClearFilters').addEventListener('click',()=>{ State.clearFilters(); $('dniSearch').value=''; State.page=0; App.refresh(); });
+    $('baseLiq').addEventListener('click',()=>App.setBase('liq'));
+    $('baseAll').addEventListener('click',()=>App.setBase('all'));
+    ['cmpA','cmpB','cmpDim','cmpMetric'].forEach(id=>$(id).addEventListener('change',Compare.render));
+    $('pgPrev').addEventListener('click',()=>{ State.page--; Detail.render(State.filtered()); });
+    $('pgNext').addEventListener('click',()=>{ State.page++; Detail.render(State.filtered()); });
+    $('detTable').addEventListener('click',e=>{ const b=e.target.closest('[data-dni]'); if(!b||!b.dataset.dni) return;
+      $('dniSearch').value=b.dataset.dni; State.filters.q=Clean.norm(b.dataset.dni); State.page=0; App.refresh(); $('clientCard').scrollIntoView({behavior:'smooth',block:'start'}); });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',App.refresh);
+    new MutationObserver(App.refresh).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    App.notes = '';
+    Hash.read();
+    window.addEventListener('hashchange',()=>{ Hash.read(); if(Hash.wanted){ Hash.apply(); App.refresh(); } });
+    App.empty(); UI.history();
+    Store.init();
+  }
+};
+App.init();
+</script></body></html>
